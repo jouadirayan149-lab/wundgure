@@ -17,10 +17,13 @@ import {
   Navigation,
   Globe,
   Settings,
-<<<<<<< HEAD
   AlertTriangle,
-=======
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
+  RefreshCw,
+  Droplets,
+  Eye,
+  Sun,
+  Thermometer,
+  Gauge,
 } from "lucide-react";
 
 const AdBanner = ({ slotId = "auto" }) => {
@@ -67,11 +70,7 @@ const translations = {
     currentHome: "موقعك الشخصي الحالي",
     forecast: "التوقعات",
     graph: "الرسم البياني",
-<<<<<<< HEAD
     tides: "المد والأمواج",
-=======
-    tides: "المد والجزر",
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
     share: "مشاركة",
     selectDay: "اختر اليوم:",
     today: "اليوم",
@@ -79,23 +78,30 @@ const translations = {
     windSpeed: "سرعة الرياح",
     windGusts: "هبات الرياح",
     windDir: "اتجاه الرياح",
-<<<<<<< HEAD
     waveHeight: "ارتفاع الموج (m)",
     wavePeriod: "فترة الموج (s)",
     waveDir: "اتجاه الموج",
     oceanCurrent: "سرعة التيار المائي",
     currentDir: "اتجاه التيار المائي",
     seaDanger: "مؤشر خطورة البحر",
-=======
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
     pressure: "الضغط الجوي",
     temp: "درجة الحرارة",
     humidity: "الرطوبة",
     clouds: "الغطاء السحابي",
+    precipitation: "التساقطات",
+    visibility: "الرؤية",
+    uv: "مؤشر UV",
+    seaTemp: "حرارة سطح البحر",
+    swell: "السويل",
+    updated: "آخر تحديث",
+    refresh: "تحديث البيانات",
+    noData: "لا توجد بيانات",
+    meters: "م",
+    minutes: "دقيقة",
     graphTitle: "رسم بياني لسرعة الرياح والهبات",
     graphDesc: "تطور سرعات الرياح خلال ساعات اليوم المحدد:",
     tidesTitle: "أوقات المد والجزر وحالة الأمواج البحرية",
-    tidesDesc: "بيانات ومواعيد حركة المد والجزر التقريبية للموقع الحالي:",
+    tidesDesc: "أوقات تقريبية للمد والجزر مستخرجة من مستوى سطح البحر المتوقع للموقع الحالي:",
     highTide: "مد مرتفع (High Tide)",
     lowTide: "جزر منخفض (Low Tide)",
     optionsTitle: "خيارات اللغة ووحدات القياس",
@@ -123,19 +129,26 @@ const translations = {
     windSpeed: "Wind speed",
     windGusts: "Wind gusts",
     windDir: "Wind direction",
-<<<<<<< HEAD
     waveHeight: "Wave height (m)",
     wavePeriod: "Wave period (s)",
     waveDir: "Wave direction",
     oceanCurrent: "Ocean Current Speed",
     currentDir: "Current Direction",
     seaDanger: "Sea Danger Rating",
-=======
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
     pressure: "Pressure",
     temp: "Temperature",
     humidity: "Humidity",
     clouds: "Cloud cover",
+    precipitation: "Precipitation",
+    visibility: "Visibility",
+    uv: "UV index",
+    seaTemp: "Sea surface temperature",
+    swell: "Swell",
+    updated: "Last update",
+    refresh: "Refresh data",
+    noData: "No data",
+    meters: "m",
+    minutes: "min",
     graphTitle: "Wind & Gusts Graph",
     graphDesc: "Wind speed development during the selected day:",
     tidesTitle: "Tides & Waves Forecast",
@@ -167,19 +180,26 @@ const translations = {
     windSpeed: "Vitesse du vent",
     windGusts: "Rafales",
     windDir: "Direction du vent",
-<<<<<<< HEAD
     waveHeight: "Hauteur des vagues (m)",
     wavePeriod: "Période des vagues (s)",
     waveDir: "Direction des vagues",
     oceanCurrent: "Courant marin",
     currentDir: "Direction du courant",
     seaDanger: "Indice de danger mer",
-=======
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
     pressure: "Pression",
     temp: "Température",
     humidity: "Humidité",
     clouds: "Nébulosité",
+    precipitation: "Précipitations",
+    visibility: "Visibilité",
+    uv: "Indice UV",
+    seaTemp: "Température de surface",
+    swell: "Swell",
+    updated: "Dernière mise à jour",
+    refresh: "Actualiser",
+    noData: "Pas de données",
+    meters: "m",
+    minutes: "min",
     graphTitle: "Graphique du Vent et des Rafales",
     graphDesc: "Évolution de la vitesse du vent pour la journée :",
     tidesTitle: "Prévisions des Marées et Vagues",
@@ -190,184 +210,6 @@ const translations = {
     selectLang: "Choisissez votre langue préférée :",
     selectSpeed: "Choisissez l'unité de vitesse du vent :",
   },
-<<<<<<< HEAD
-=======
-  es: {
-    home: "Inicio",
-    gps: "GPS",
-    searchPlaceholder: "Buscar spot...",
-    spots: "Spots",
-    maps: "Mapas",
-    archive: "Archivo",
-    options: "Opciones",
-    favorites: "Favoritos:",
-    setHome: "Establecer como principal",
-    currentHome: "Tu spot principal actual",
-    forecast: "Pronóstico",
-    graph: "Gráfico",
-    tides: "Mareas y Olas",
-    share: "Compartir",
-    selectDay: "Seleccionar día:",
-    today: "Hoy",
-    tomorrow: "Mañana",
-    windSpeed: "Velocidad del viento",
-    windGusts: "Ráfagas",
-    windDir: "Dirección del viento",
-    pressure: "Presión",
-    temp: "Temperatura",
-    humidity: "Humedad",
-    clouds: "Nubosidad",
-    graphTitle: "Gráfico de Viento y Ráfagas",
-    graphDesc: "Evolución de la velocidad del viento durante el día:",
-    tidesTitle: "Pronóstico de Mareas y Olas",
-    tidesDesc: "Datos aproximados de mareas para la ubicación actual:",
-    highTide: "Marea Alta",
-    lowTide: "Marea Baja",
-    optionsTitle: "Opciones de Idioma y Unidades",
-    selectLang: "Elige tu idioma preferido:",
-    selectSpeed: "Elige la unidad de velocidad del viento:",
-  },
-  de: {
-    home: "Startseite",
-    gps: "GPS",
-    searchPlaceholder: "Spot suchen...",
-    spots: "Spots",
-    maps: "Karten",
-    archive: "Archiv",
-    options: "Optionen",
-    favorites: "Favoriten:",
-    setHome: "Als Hauptspot festlegen",
-    currentHome: "Aktueller Hauptspot",
-    forecast: "Vorhersage",
-    graph: "Diagramm",
-    tides: "Gezeiten & Wellen",
-    share: "Teilen",
-    selectDay: "Tag wählen:",
-    today: "Heute",
-    tomorrow: "Morgen",
-    windSpeed: "Windstärke",
-    windGusts: "Böen",
-    windDir: "Windrichtung",
-    pressure: "Luftdruck",
-    temp: "Temperatur",
-    humidity: "Feuchtigkeit",
-    clouds: "Bewölkung",
-    graphTitle: "Wind- und Böendiagramm",
-    graphDesc: "Entwicklung der Windgeschwindigkeit am gewählten Tag:",
-    tidesTitle: "Gezeiten- und Wellenvorhersage",
-    tidesDesc: "Ungefähre Gezeitendaten für den aktuellen Standort:",
-    highTide: "Flut (High Tide)",
-    lowTide: "Ebbe (Low Tide)",
-    optionsTitle: "Sprach- und Einheitenoptionen",
-    selectLang: "Wählen Sie Ihre bevorzugte Sprache:",
-    selectSpeed: "Wählen Sie die Windgeschwindigkeitseinheit:",
-  },
-  it: {
-    home: "Home",
-    gps: "GPS",
-    searchPlaceholder: "Cerca spot...",
-    spots: "Spot",
-    maps: "Mappe",
-    archive: "Archivio",
-    options: "Opzioni",
-    favorites: "Preferiti:",
-    setHome: "Imposta come principale",
-    currentHome: "Spot principale attuale",
-    forecast: "Previsioni",
-    graph: "Grafico",
-    tides: "Maree e Onde",
-    share: "Condividi",
-    selectDay: "Seleziona giorno:",
-    today: "Oggi",
-    tomorrow: "Domani",
-    windSpeed: "Velocità vento",
-    windGusts: "Raffiche",
-    windDir: "Direzione vento",
-    pressure: "Pressione",
-    temp: "Temperatura",
-    humidity: "Umidità",
-    clouds: "Copertura nuvolosa",
-    graphTitle: "Grafico Vento e Raffiche",
-    graphDesc: "Evoluzione della velocità del vento durante la giornata:",
-    tidesTitle: "Previsioni Maree e Onde",
-    tidesDesc: "Dati approssimativi delle maree per la posizione corrente:",
-    highTide: "Alta Marea",
-    lowTide: "Bassa Marea",
-    optionsTitle: "Opzioni Lingua e Unità",
-    selectLang: "Scegli la tua lingua preferita:",
-    selectSpeed: "Scegli l'unità di velocità del vento:",
-  },
-  ru: {
-    home: "Главная",
-    gps: "GPS",
-    searchPlaceholder: "Поиск спота...",
-    spots: "Споты",
-    maps: "Карты",
-    archive: "Архив",
-    options: "Опции",
-    favorites: "Избранное:",
-    setHome: "Сделать главным",
-    currentHome: "Текущий главный спот",
-    forecast: "Прогноз",
-    graph: "График",
-    tides: "Приливы и волны",
-    share: "Поделиться",
-    selectDay: "Выберите день:",
-    today: "Сегодня",
-    tomorrow: "Завтра",
-    windSpeed: "Скорость ветра",
-    windGusts: "Порывы",
-    windDir: "Направление",
-    pressure: "Давление",
-    temp: "Температура",
-    humidity: "Влажность",
-    clouds: "Облачность",
-    graphTitle: "График ветра и порывов",
-    graphDesc: "Изменение скорости ветра в выбранный день:",
-    tidesTitle: "Прогноз приливов и волн",
-    tidesDesc: "Приблизительные данные о приливах для текущего места:",
-    highTide: "Прилив",
-    lowTide: "Отлив",
-    optionsTitle: "Язык и единицы измерения",
-    selectLang: "Выберите предпочитаемый язык:",
-    selectSpeed: "Выберите единицу скорости ветра:",
-  },
-  zh: {
-    home: "首页",
-    gps: "GPS",
-    searchPlaceholder: "搜索地点...",
-    spots: "地点",
-    maps: "地图",
-    archive: "存档",
-    options: "选项",
-    favorites: "收藏:",
-    setHome: "设为主地点",
-    currentHome: "当前主地点",
-    forecast: "预报",
-    graph: "图表",
-    tides: "潮汐与海浪",
-    share: "分享",
-    selectDay: "选择日期:",
-    today: "今天",
-    tomorrow: "明天",
-    windSpeed: "风速",
-    windGusts: "阵风",
-    windDir: "风向",
-    pressure: "气压",
-    temp: "温度",
-    humidity: "湿度",
-    clouds: "云量",
-    graphTitle: "风速与阵风图表",
-    graphDesc: "所选日期的风速变化趋势：",
-    tidesTitle: "潮汐与海浪预报",
-    tidesDesc: "当前位置的近似潮汐与海浪数据：",
-    highTide: "高潮",
-    lowTide: "低潮",
-    optionsTitle: "语言与单位选项",
-    selectLang: "选择您的首选语言：",
-    selectSpeed: "选择风速单位：",
-  },
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
 };
 
 export default function App() {
@@ -380,6 +222,8 @@ export default function App() {
 
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [lastUpdated, setLastUpdated] = useState(null);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [activeTab, setActiveTab] = useState("forecast");
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
@@ -389,6 +233,8 @@ export default function App() {
 
   const t = translations[lang] || translations.ar;
   const isRtl = lang === "ar";
+
+  useEffect(() => { try { localStorage.setItem("wg_lang", lang); localStorage.setItem("wg_speed_unit", speedUnit); } catch(e){} }, [lang, speedUnit]);
 
   const [activeModal, setActiveModal] = useState(null);
 
@@ -492,21 +338,20 @@ export default function App() {
     );
   };
 
-<<<<<<< HEAD
   // دالة جلب الطقس والأمواج والتيارات المائية بالتزامن
   const fetchWeather = async (lat, lon) => {
     setLoading(true);
     try {
       // 1. جلب بيانات الطقس والرياح
       const weatherRes = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_gusts_10m,wind_direction_10m,cloud_cover&daily=sunrise,sunset&wind_speed_unit=${speedUnit}&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_gusts_10m,wind_direction_10m,cloud_cover,precipitation,precipitation_probability,visibility,uv_index,apparent_temperature&daily=sunrise,sunset,uv_index_max,temperature_2m_max,temperature_2m_min,wind_gusts_10m_max&wind_speed_unit=${speedUnit}&timezone=auto&forecast_days=7`
       );
       const data = await weatherRes.json();
 
       // 2. جلب بيانات البحر، الأمواج، والتيارات المائية وسط الماء
       try {
         const marineRes = await fetch(
-          `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,wave_period,wave_direction,ocean_current_velocity,ocean_current_direction&timezone=auto`
+          `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,wave_period,wave_direction,swell_wave_height,swell_wave_period,swell_wave_direction,ocean_current_velocity,ocean_current_direction,sea_level_height_msl,sea_surface_temperature&timezone=auto&forecast_days=7&wind_speed_unit=${speedUnit}`
         );
         const marineData = await marineRes.json();
 
@@ -516,34 +361,30 @@ export default function App() {
           data.hourly.wave_direction = marineData.hourly.wave_direction;
           data.hourly.ocean_current_velocity = marineData.hourly.ocean_current_velocity;
           data.hourly.ocean_current_direction = marineData.hourly.ocean_current_direction;
+          data.hourly.sea_level_height_msl = marineData.hourly.sea_level_height_msl;
+          data.hourly.sea_surface_temperature = marineData.hourly.sea_surface_temperature;
+          data.hourly.swell_wave_height = marineData.hourly.swell_wave_height;
+          data.hourly.swell_wave_period = marineData.hourly.swell_wave_period;
+          data.hourly.swell_wave_direction = marineData.hourly.swell_wave_direction;
         }
       } catch (marineErr) {
         console.warn("Marine API warning:", marineErr);
       }
 
-=======
-  const fetchWeather = async (lat, lon) => {
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_gusts_10m,wind_direction_10m,cloud_cover&daily=sunrise,sunset&wind_speed_unit=${speedUnit}&timezone=auto`
-      );
-      const data = await res.json();
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
       setWeatherData(data);
+      setLastUpdated(new Date());
+      setErrorMessage("");
+      try { localStorage.setItem("wg_last_weather", JSON.stringify({ lat, lon, name: locationName, data, savedAt: Date.now() })); } catch (e) {}
     } catch (err) {
       console.error("Weather error:", err);
+      setErrorMessage("تعذر تحميل بيانات الطقس حالياً. حاول التحديث من جديد.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-<<<<<<< HEAD
     fetchWeather(coords.lat, coords.lon);
-=======
-    fetchWeather(homeSpot.lat, homeSpot.lon);
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
   }, [speedUnit]);
 
   const handleSearch = async (e) => {
@@ -586,11 +427,7 @@ export default function App() {
   };
 
   const shareLocation = async () => {
-<<<<<<< HEAD
     const text = `Wind & Wave forecast - ${locationName}`;
-=======
-    const text = `Wind forecast - ${locationName}`;
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
     try {
       if (navigator.share) {
         await navigator.share({
@@ -607,29 +444,25 @@ export default function App() {
   };
 
   const getAvailableDays = () => {
-    if (!weatherData?.hourly?.time) return [];
-    const daysMap = [];
-    const times = weatherData.hourly.time;
-    for (let i = 0; i < times.length; i += 24) {
-      const dayDate = times[i].split("T")[0];
-      daysMap.push({
-        index: daysMap.length,
-        date: dayDate,
-        label:
-          daysMap.length === 0
-            ? t.today
-            : daysMap.length === 1
-            ? t.tomorrow
-            : dayDate,
-      });
-      if (daysMap.length >= 7) break;
-    }
-    return daysMap;
+    const times = weatherData?.hourly?.time || [];
+    if (!times.length) return [];
+    const seen = [];
+    times.forEach((time, i) => {
+      const date = time.split("T")[0];
+      if (!seen.some((d) => d.date === date)) seen.push({ date, firstIndex: i });
+    });
+    return seen.slice(0, 7).map((d, i) => ({
+      index: i,
+      date: d.date,
+      firstIndex: d.firstIndex,
+      label: i === 0 ? t.today : i === 1 ? t.tomorrow : d.date,
+    }));
   };
 
   const availableDays = getAvailableDays();
-  const startIndex = selectedDayIndex * 24;
-  const endIndex = startIndex + 24;
+  const selectedDay = availableDays[selectedDayIndex];
+  const startIndex = selectedDay?.firstIndex ?? selectedDayIndex * 24;
+  const endIndex = availableDays[selectedDayIndex + 1]?.firstIndex ?? Math.min(startIndex + 24, weatherData?.hourly?.time?.length || startIndex + 24);
 
   const getSunTimes = () => {
     if (!weatherData?.daily?.sunrise || !weatherData?.daily?.sunset)
@@ -644,35 +477,77 @@ export default function App() {
 
   const sunTimes = getSunTimes();
 
+  const getTideEvents = () => {
+    const times = weatherData?.hourly?.time || [];
+    const levels = weatherData?.hourly?.sea_level_height_msl || [];
+    const events = [];
+
+    if (!times.length || !levels.length) return events;
+
+    // Detect local maxima/minima in the modeled sea level at hourly resolution.
+    for (let i = 1; i < times.length - 1; i++) {
+      const prev = levels[i - 1];
+      const curr = levels[i];
+      const next = levels[i + 1];
+
+      if ([prev, curr, next].some((v) => v === null || v === undefined || Number.isNaN(v))) {
+        continue;
+      }
+
+      if (curr > prev && curr >= next) {
+        events.push({ type: "high", time: times[i], level: curr });
+      } else if (curr < prev && curr <= next) {
+        events.push({ type: "low", time: times[i], level: curr });
+      }
+    }
+
+    return events;
+  };
+
   const getWindArrow = (deg) => {
-<<<<<<< HEAD
     if (deg === null || deg === undefined) return "-";
-=======
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
     const arrows = ["↓", "↙", "←", "↖", "↑", "↗", "→", "↘"];
     const index = Math.round(deg / 45) % 8;
     return arrows[index];
   };
 
   const getWindStyle = (val) => {
-    if (val <= 3) return { backgroundColor: "#dff9ff", color: "#0f172a" };
-    if (val <= 6) return { backgroundColor: "#8be9f5", color: "#0f172a" };
-    if (val <= 8) return { backgroundColor: "#22d3ee", color: "#082f49", fontWeight: "700" };
-    if (val <= 11) return { backgroundColor: "#00cfff", color: "#001018", fontWeight: "800" };
-    if (val <= 14) return { backgroundColor: "#00e676", color: "#001b0b", fontWeight: "900" };
-    if (val <= 19) return { backgroundColor: "#76ff03", color: "#101800", fontWeight: "900" };
-    if (val <= 25) return { backgroundColor: "#ffe600", color: "#171200", fontWeight: "900" };
-    if (val <= 30) return { backgroundColor: "#ff9800", color: "#1a0b00", fontWeight: "900" };
-    return { backgroundColor: "#ff1744", color: "#ffffff", fontWeight: "900" };
+    // Thresholds are based on knots; convert the displayed value back to knots
+    // so the same colors work for kn, km/h, m/s and mph.
+    const toKnots = {
+      kn: 1,
+      kmh: 0.539957,
+      ms: 1.94384,
+      mph: 0.868976,
+    }[speedUnit] || 1;
+
+    const kts = val * toKnots;
+
+    if (kts <= 3) return { background: "linear-gradient(135deg,#e0f2fe,#bae6fd)", color: "#0f172a" };
+    if (kts <= 6) return { background: "linear-gradient(135deg,#bae6fd,#67e8f9)", color: "#0f172a" };
+    if (kts <= 8) return { background: "linear-gradient(135deg,#67e8f9,#22d3ee)", color: "#082f49", fontWeight: "700" };
+    if (kts <= 11) return { background: "linear-gradient(135deg,#22d3ee,#00cfff)", color: "#001018", fontWeight: "800" };
+    if (kts <= 14) return { background: "linear-gradient(135deg,#00e676,#86efac)", color: "#001b0b", fontWeight: "900" };
+    if (kts <= 19) return { background: "linear-gradient(135deg,#76ff03,#bef264)", color: "#101800", fontWeight: "900" };
+    if (kts <= 25) return { background: "linear-gradient(135deg,#fde047,#facc15)", color: "#171200", fontWeight: "900" };
+    if (kts <= 30) return { background: "linear-gradient(135deg,#fb923c,#f97316)", color: "#1a0b00", fontWeight: "900" };
+    return { background: "linear-gradient(135deg,#ef4444,#dc2626)", color: "#ffffff", fontWeight: "900" };
   };
 
-<<<<<<< HEAD
   // حاسبة خطورة البحر وعدد النجوم
   const getSeaDangerRating = (wave, gust, current) => {
     let score = 0;
     const w = wave || 0;
-    const g = gust || 0;
-    const c = current || 0;
+    const c = (current || 0) * ({ kn:1, kmh:0.539957, ms:1.94384, mph:0.868976 }[speedUnit] || 1);
+
+    const toKnots = {
+      kn: 1,
+      kmh: 0.539957,
+      ms: 1.94384,
+      mph: 0.868976,
+    }[speedUnit] || 1;
+
+    const g = (gust || 0) * toKnots;
 
     if (w > 3.0 || g > 35 || c > 2.5) score = 5;
     else if (w > 2.2 || g > 27 || c > 1.8) score = 4;
@@ -701,8 +576,6 @@ export default function App() {
     );
   };
 
-=======
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
   const getTemperatureStyle = (temp) => {
     if (temp < 10) return { backgroundColor: "#60a5fa", color: "#ffffff", fontWeight: "800" };
     if (temp < 18) return { backgroundColor: "#7dd3fc", color: "#082f49", fontWeight: "800" };
@@ -718,6 +591,25 @@ export default function App() {
     if (cloud <= 60) return { backgroundColor: "#cbd5e1", color: "#1e293b" };
     if (cloud <= 80) return { backgroundColor: "#64748b", color: "#ffffff" };
     return { backgroundColor: "#1e293b", color: "#ffffff" };
+  };
+
+  const formatHour = (value) => value?.split("T")[1]?.slice(0, 5) || "-";
+
+  const getDaySlice = (key) => (weatherData?.hourly?.[key] || []).slice(startIndex, endIndex);
+
+  const getTideChartPoints = () => {
+    const values = getDaySlice("sea_level_height_msl");
+    if (!values.length) return null;
+    const valid = values.map(Number).filter(Number.isFinite);
+    if (!valid.length) return null;
+    const min = Math.min(...valid), max = Math.max(...valid);
+    const range = Math.max(max - min, 0.01);
+    return values.map((v, i) => {
+      if (!Number.isFinite(Number(v))) return null;
+      const x = (i / Math.max(values.length - 1, 1)) * 100;
+      const y = 88 - ((Number(v) - min) / range) * 70;
+      return { x, y, v: Number(v), time: formatHour(weatherData.hourly.time[startIndex + i]) };
+    }).filter(Boolean);
   };
 
   return (
@@ -808,6 +700,19 @@ export default function App() {
         }
         .set-home-link:hover { background: #e2e8f0; }
         .loading { display: flex; align-items: center; gap: 7px; color: #0891b2; font-weight: 800; white-space: nowrap; }
+        .spin { animation: spin 1s linear infinite; }
+        .error-banner { margin: 0 8px 8px; padding: 10px 12px; border-radius: 8px; background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; font-weight: 800; display:flex; align-items:center; gap:8px; }
+        .metric-strip { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; padding:8px; background:#f8fafc; border-bottom:1px solid #dbe1e8; }
+        .metric-card { background:white; border:1px solid #e2e8f0; border-radius:8px; padding:8px 10px; min-width:0; box-shadow:0 1px 2px rgba(15,23,42,.04); }
+        .metric-label { font-size:10px; color:#64748b; font-weight:800; display:flex; align-items:center; gap:5px; }
+        .metric-value { margin-top:3px; font-size:15px; font-weight:900; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .chart-card { background:#fff; border:1px solid #dbe1e8; border-radius:10px; padding:12px; box-shadow:0 2px 7px rgba(15,23,42,.06); overflow:hidden; }
+        .chart-scroll { overflow-x:auto; }
+        .tide-svg { width:100%; min-width:680px; height:250px; display:block; }
+        .event-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+        .event-card { padding:12px; border-radius:9px; border:1px solid #dbeafe; background:rgba(255,255,255,.72); }
+        .subtle { color:#64748b; font-size:10px; }
+        @media (max-width: 900px) { .metric-strip { grid-template-columns:repeat(3,minmax(0,1fr)); } }
         
         .tabs { background: #e2e8f0; border-bottom: 1px solid #cbd5e1; padding: 6px 14px; display: flex; gap: 5px; overflow-x: auto; white-space: nowrap; }
         .tab { border: 0; background: transparent; color: #334155; padding: 7px 11px; border-radius: 5px; cursor: pointer; font-weight: 600; }
@@ -828,17 +733,13 @@ export default function App() {
         .forecast-container { width: 100%; background: white; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,.06); overflow: hidden; }
         .table-scroll { width: 100%; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
         .weather-table { width: 100%; min-width: 1180px; border-collapse: collapse; text-align: center; font-family: Consolas, monospace; font-size: 11px; }
-        .weather-table td { height: 31px; padding: 4px; border-right: 1px solid #dbe1e8; border-bottom: 1px solid #dbe1e8; white-space: nowrap; }
-        .weather-table .row-title { width: 185px; min-width: 185px; text-align: ${isRtl ? "right" : "left"}; ${isRtl ? "padding-right: 10px;" : "padding-left: 10px;"} background: #f8fafc; font-weight: 900; position: sticky; ${isRtl ? "right: 0;" : "left: 0;"} z-index: 5; box-shadow: ${isRtl ? "-2px 0 3px rgba(0,0,0,.08)" : "2px 0 3px rgba(0,0,0,.08)"}; }
+        .weather-table td { height: 33px; padding: 4px; border-right: 1px solid #dbe1e8; border-bottom: 1px solid #dbe1e8; white-space: nowrap; }
+        .weather-table .row-title { width: 205px; min-width: 185px; text-align: ${isRtl ? "right" : "left"}; ${isRtl ? "padding-right: 10px;" : "padding-left: 10px;"} background: #f8fafc; font-weight: 900; position: sticky; ${isRtl ? "right: 0;" : "left: 0;"} z-index: 5; box-shadow: ${isRtl ? "-2px 0 3px rgba(0,0,0,.08)" : "2px 0 3px rgba(0,0,0,.08)"}; }
         .weather-table thead .row-title { background: #dbe4ee; }
         .hour-cell { min-width: 42px; }
         .direction { background: #ddd6fe; color: #5b21b6; font-size: 17px; font-weight: 900; }
-        .mobile-hint { display: none; }
+        .mobile-hint { display: none; background: linear-gradient(135deg,#ecfeff,#dbeafe); color: #155e75; }
 
-<<<<<<< HEAD
-=======
-        /* خلفية متميزة للرسم البياني (غير بيضاء - داكنة احترافية) */
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
         .graph-view {
           background: linear-gradient(135deg, #091a2a 0%, #102a43 50%, #0d2137 100%);
           color: #ffffff;
@@ -848,13 +749,6 @@ export default function App() {
           background: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 100%);
           padding: 24px; border-radius: 8px; border: 1px solid #bbf7d0; box-shadow: 0 4px 12px rgba(22,101,52,0.08); min-height: 380px;
         }
-<<<<<<< HEAD
-=======
-        .tide-card {
-          display: flex; gap: 15px; align-items: center; background: rgba(255,255,255,0.85); backdrop-filter: blur(5px);
-          border: 1px solid #bbf7d0; padding: 16px; border-radius: 8px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-        }
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
 
         .modal-overlay {
           position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -900,6 +794,9 @@ export default function App() {
           .weather-table .row-title { width: 155px; min-width: 155px; font-size: 10px; ${isRtl ? "padding-right: 7px;" : "padding-left: 7px;"} }
           .weather-table td { height: 29px; padding: 3px; }
           .hour-cell { min-width: 43px; }
+          .metric-strip { grid-template-columns:repeat(2,minmax(0,1fr)); }
+          .event-grid { grid-template-columns:1fr; }
+          .tide-svg { min-width:620px; }
         }
       `}</style>
 
@@ -966,7 +863,6 @@ export default function App() {
         </div>
       </header>
 
-<<<<<<< HEAD
       {/* FAVORITES BAR */}
       <div className="favorites-bar">
         <span className="favorite-title">{t.favorites}</span>
@@ -1023,77 +919,36 @@ export default function App() {
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           {loading && (
             <div className="loading">
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2 size={16} className="spin" />
               <span>جاري التحميل...</span>
             </div>
           )}
+          {lastUpdated && <span className="subtle">{t.updated}: {lastUpdated.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}</span>}
+          <button className="set-home-link" onClick={() => fetchWeather(coords.lat, coords.lon)} disabled={loading}>
+            <RefreshCw size={13} className={loading ? "spin" : ""} />
+            <span>{t.refresh}</span>
+          </button>
           <button className="set-home-link" onClick={shareLocation}>
             <Share2 size={13} />
             <span>{t.share}</span>
           </button>
-=======
-      {/* FAVORITES */}
-      <div className="favorites-bar">
-        <span className="favorite-title">{t.favorites}</span>
-        {favorites.map((fav, idx) => (
-          <div
-            key={idx}
-            className={`favorite-chip ${
-              fav.name === locationName ? "favorite-chip-active" : ""
-            }`}
-            onClick={() => selectFavorite(fav)}
-          >
-            <span>{fav.name.split("-")[1] || fav.name}</span>
-            <button
-              className="favorite-delete"
-              onClick={(e) => removeFavoriteByName(e, fav.name)}
-              title="Delete"
-            >
-              <Trash2 size={13} />
-            </button>
-          </div>
-        ))}
-      </div>
-
-      {/* TOP AD */}
-      <div className="ad-wrapper">
-        <AdBanner />
-      </div>
-
-      {/* LOCATION */}
-      <div className="location-bar">
-        <div className="location-name">
-          <span>📍 {locationName}</span>
-          <button className="favorite-star" onClick={toggleFavorite} title="Favorite">
-            <Star
-              size={19}
-              fill={isFavorite ? "#facc15" : "none"}
-              color={isFavorite ? "#f59e0b" : "#94a3b8"}
-            />
-          </button>
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          {!isHomeSpot ? (
-            <button className="set-home-link" onClick={setAsHomeSpot}>
-              <MapPin size={13} color="#0284c7" />
-              {t.setHome}
-            </button>
-          ) : (
-            <span style={{ fontSize: "11px", color: "#16a34a", fontWeight: "800" }}>
-              🏠 {t.currentHome}
-            </span>
-          )}
-
-          {loading && (
-            <div className="loading">
-              <Loader2 size={16} className="animate-spin" />
-              Loading...
-            </div>
-          )}
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
         </div>
       </div>
+
+      {errorMessage && (
+        <div className="error-banner"><AlertTriangle size={16} /> <span>{errorMessage}</span><button onClick={() => fetchWeather(coords.lat, coords.lon)} style={{marginInlineStart:"auto",border:0,borderRadius:6,padding:"6px 9px",cursor:"pointer",fontWeight:900}}>{t.refresh}</button></div>
+      )}
+
+      {weatherData && (
+        <div className="metric-strip">
+          <div className="metric-card"><div className="metric-label"><Thermometer size={13}/> {t.temp}</div><div className="metric-value">{weatherData.hourly?.temperature_2m?.[startIndex] != null ? Math.round(weatherData.hourly.temperature_2m[startIndex]) + "°" : "-"}</div></div>
+          <div className="metric-card"><div className="metric-label"><Droplets size={13}/> {t.humidity}</div><div className="metric-value">{weatherData.hourly?.relative_humidity_2m?.[startIndex] != null ? Math.round(weatherData.hourly.relative_humidity_2m[startIndex]) + "%" : "-"}</div></div>
+          <div className="metric-card"><div className="metric-label"><Gauge size={13}/> {t.pressure}</div><div className="metric-value">{weatherData.hourly?.pressure_msl?.[startIndex] != null ? Math.round(weatherData.hourly.pressure_msl[startIndex]) + " hPa" : "-"}</div></div>
+          <div className="metric-card"><div className="metric-label"><Sun size={13}/> {t.uv}</div><div className="metric-value">{weatherData.hourly?.uv_index?.[startIndex] != null ? Number(weatherData.hourly.uv_index[startIndex]).toFixed(1) : "-"}</div></div>
+          <div className="metric-card"><div className="metric-label"><Eye size={13}/> {t.visibility}</div><div className="metric-value">{weatherData.hourly?.visibility?.[startIndex] != null ? (weatherData.hourly.visibility[startIndex] / 1000).toFixed(1) + " km" : "-"}</div></div>
+          <div className="metric-card"><div className="metric-label"><Waves size={13}/> {t.seaTemp}</div><div className="metric-value">{weatherData.hourly?.sea_surface_temperature?.[startIndex] != null ? Number(weatherData.hourly.sea_surface_temperature[startIndex]).toFixed(1) + "°C" : "-"}</div></div>
+        </div>
+      )}
 
       {/* TABS */}
       <div className="tabs">
@@ -1101,27 +956,18 @@ export default function App() {
           className={`tab ${activeTab === "forecast" ? "tab-active" : ""}`}
           onClick={() => setActiveTab("forecast")}
         >
-<<<<<<< HEAD
-=======
-          <Activity size={14} style={{ verticalAlign: "middle", margin: "0 4px" }} />
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
           {t.forecast}
         </button>
         <button
           className={`tab ${activeTab === "graph" ? "tab-active" : ""}`}
           onClick={() => setActiveTab("graph")}
         >
-<<<<<<< HEAD
-=======
-          <TrendingUp size={14} style={{ verticalAlign: "middle", margin: "0 4px" }} />
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
           {t.graph}
         </button>
         <button
           className={`tab ${activeTab === "tides" ? "tab-active" : ""}`}
           onClick={() => setActiveTab("tides")}
         >
-<<<<<<< HEAD
           {t.tides}
         </button>
       </div>
@@ -1147,52 +993,15 @@ export default function App() {
         {activeTab === "forecast" && (
           <div className="forecast-container">
             <div className="mobile-hint">⬅️ اسحب الجدول أفقياً لرؤية باقي الساعات ➡️</div>
-=======
-          <Waves size={14} style={{ verticalAlign: "middle", margin: "0 4px" }} />
-          {t.tides}
-        </button>
-        <button className="tab" onClick={shareLocation}>
-          <Share2 size={14} style={{ verticalAlign: "middle", margin: "0 4px" }} />
-          {t.share}
-        </button>
-      </div>
-
-      {/* DAYS SELECTOR BAR */}
-      {activeTab === "forecast" && availableDays.length > 0 && (
-        <div className="days-bar">
-          <Calendar size={15} color="#475569" />
-          <span style={{ fontWeight: "800", color: "#475569", fontSize: "12px" }}>{t.selectDay}</span>
-          {availableDays.map((day) => (
-            <button
-              key={day.index}
-              className={`day-btn ${selectedDayIndex === day.index ? "day-btn-active" : ""}`}
-              onClick={() => setSelectedDayIndex(day.index)}
-            >
-              {day.label} ({day.date})
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* MAIN */}
-      <main className="main">
-        {weatherData?.hourly && activeTab === "forecast" && (
-          <div className="forecast-container">
-            <div className="mobile-hint">
-              📱 اسحب الجدول يمينًا ويسارًا لرؤية جميع الساعات
-            </div>
-
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
             <div className="table-scroll">
               <table className="weather-table">
                 <thead>
                   <tr>
-<<<<<<< HEAD
-                    <td className="row-title">الساعة (UTC)</td>
+                    <td className="row-title">الساعة (Local)</td>
                     {weatherData?.hourly?.time
                       ?.slice(startIndex, endIndex)
                       .map((tStr, idx) => (
-                        <td key={idx} className="hour-cell" style={{ fontWeight: "900", background: "#f1f5f9" }}>
+                        <td key={idx} className="hour-cell" style={{ fontWeight: "900", background: "linear-gradient(135deg,#dbeafe,#e0f2fe)", color: "#0f172a" }}>
                           {tStr.split("T")[1]?.slice(0, 2)}h
                         </td>
                       ))}
@@ -1324,51 +1133,11 @@ export default function App() {
                         return (
                           <td key={idx} style={{ background: rating >= 4 ? "#fef2f2" : "#ffffff" }}>
                             {renderDangerStars(rating)}
-=======
-                    <td className="row-title">
-                      Date: {availableDays[selectedDayIndex]?.date || ""}
-                    </td>
-                    {weatherData.hourly.time.slice(startIndex, endIndex).map((t, idx) => (
-                      <td
-                        key={idx}
-                        className="hour-cell"
-                        style={{ background: "#f1f5f9", fontWeight: 900 }}
-                      >
-                        {t.split("T")[0].slice(5)}
-                      </td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td className="row-title">Hour</td>
-                    {weatherData.hourly.time.slice(startIndex, endIndex).map((t, idx) => (
-                      <td
-                        key={idx}
-                        className="hour-cell"
-                        style={{ background: "#ffffff", fontWeight: 900 }}
-                      >
-                        {t.split("T")[1]}
-                      </td>
-                    ))}
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <tr>
-                    <td className="row-title">💨 {t.windSpeed} ({speedUnit})</td>
-                    {weatherData.hourly.wind_speed_10m
-                      .slice(startIndex, endIndex)
-                      .map((speed, idx) => {
-                        const val = Math.round(speed);
-                        return (
-                          <td key={idx} className="hour-cell" style={getWindStyle(val)}>
-                            {val}
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
                           </td>
                         );
                       })}
                   </tr>
 
-<<<<<<< HEAD
                   {/* --- درجة الحرارة --- */}
                   <tr>
                     <td className="row-title">🌡️ {t.temp} (°C)</td>
@@ -1377,78 +1146,10 @@ export default function App() {
                       .map((temp, idx) => (
                         <td key={idx} style={getTemperatureStyle(temp)}>
                           {Math.round(temp)}°
-=======
-                  <tr>
-                    <td className="row-title">🌬️ {t.windGusts} ({speedUnit})</td>
-                    {weatherData.hourly.wind_gusts_10m
-                      .slice(startIndex, endIndex)
-                      .map((gust, idx) => {
-                        const val = Math.round(gust);
-                        return (
-                          <td key={idx} className="hour-cell" style={getWindStyle(val)}>
-                            {val}
-                          </td>
-                        );
-                      })}
-                  </tr>
-
-                  <tr>
-                    <td className="row-title">🧭 {t.windDir}</td>
-                    {weatherData.hourly.wind_direction_10m
-                      .slice(startIndex, endIndex)
-                      .map((dir, idx) => (
-                        <td key={idx} className="hour-cell direction">
-                          {getWindArrow(dir)}
                         </td>
                       ))}
                   </tr>
 
-                  <tr>
-                    <td className="row-title">🌀 {t.pressure} (hPa)</td>
-                    {weatherData.hourly.pressure_msl
-                      ?.slice(startIndex, endIndex)
-                      .map((pres, idx) => (
-                        <td
-                          key={idx}
-                          className="hour-cell"
-                          style={{ background: "#f8fafc", fontWeight: "700" }}
-                        >
-                          {Math.round(pres)}
-                        </td>
-                      ))}
-                  </tr>
-
-                  <tr>
-                    <td className="row-title">🌡️ {t.temp} (°C)</td>
-                    {weatherData.hourly.temperature_2m
-                      .slice(startIndex, endIndex)
-                      .map((temp, idx) => {
-                        const tempVal = Math.round(temp);
-                        return (
-                          <td key={idx} className="hour-cell" style={getTemperatureStyle(tempVal)}>
-                            {tempVal}
-                          </td>
-                        );
-                      })}
-                  </tr>
-
-                  <tr>
-                    <td className="row-title">💧 {t.humidity} (%)</td>
-                    {weatherData.hourly.relative_humidity_2m
-                      ?.slice(startIndex, endIndex)
-                      .map((hum, idx) => (
-                        <td
-                          key={idx}
-                          className="hour-cell"
-                          style={{ background: "#e0f2fe", color: "#0369a1" }}
-                        >
-                          {hum}
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
-                        </td>
-                      ))}
-                  </tr>
-
-<<<<<<< HEAD
                   {/* --- الغطاء السحابي --- */}
                   <tr>
                     <td className="row-title">☁️ {t.clouds} (%)</td>
@@ -1472,187 +1173,170 @@ export default function App() {
                         </td>
                       ))}
                   </tr>
-=======
-                  {weatherData.hourly.cloud_cover && (
-                    <tr>
-                      <td className="row-title">☁️ {t.clouds} (%)</td>
-                      {weatherData.hourly.cloud_cover
-                        .slice(startIndex, endIndex)
-                        .map((cloud, idx) => (
-                          <td key={idx} className="hour-cell" style={getCloudStyle(cloud)}>
-                            {cloud}
-                          </td>
-                        ))}
-                    </tr>
-                  )}
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
                 </tbody>
               </table>
+            </div>
+            <div style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "6px 12px",
+              padding: "7px 10px",
+              borderTop: "1px solid #dbe1e8",
+              background: "#f8fafc",
+              fontSize: "10px",
+              fontWeight: "800",
+              color: "#475569"
+            }}>
+              <span>🟢 هادئ</span>
+              <span>🟡 متوسط</span>
+              <span>🟠 قوي</span>
+              <span>🔴 قوي جداً</span>
+              <span style={{ marginInlineStart: "auto" }}>القيم تتغير حسب وحدة السرعة المختارة</span>
             </div>
           </div>
         )}
 
         {activeTab === "graph" && (
           <div className="graph-view">
-<<<<<<< HEAD
-            <h3 style={{ marginTop: 0, color: "#38bdf8" }}>{t.graphTitle}</h3>
-            <p style={{ color: "#94a3b8" }}>{t.graphDesc}</p>
-            <div style={{ display: "flex", alignItems: "flex-end", gap: "6px", height: "220px", marginTop: "30px", paddingBottom: "10px", borderBottom: "1px solid #334155" }}>
-              {weatherData?.hourly?.wind_speed_10m
-                ?.slice(startIndex, endIndex)
-                .map((val, idx) => {
-                  const h = Math.min(val * 5, 180);
-                  return (
-                    <div key={idx} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "5px" }}>
-                      <span style={{ fontSize: "10px", color: "#38bdf8", fontWeight: "bold" }}>{Math.round(val)}</span>
-                      <div style={{ width: "100%", height: `${h}px`, background: "linear-gradient(to top, #0284c7, #38bdf8)", borderRadius: "3px 3px 0 0" }} />
-                      <span style={{ fontSize: "9px", color: "#64748b" }}>{idx % 3 === 0 ? `${idx}h` : ""}</span>
-=======
-            <h3 style={{ marginTop: 0, color: "#38bdf8", display: "flex", alignItems: "center", gap: "8px" }}>
-              <TrendingUp size={20} color="#38bdf8" />
-              📈 {t.graphTitle}
-            </h3>
-            <p style={{ color: "#94a3b8", marginBottom: "15px" }}>
-              {t.graphDesc}
-            </p>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "flex-end",
-                gap: "6px",
-                height: "220px",
-                borderBottom: "2px solid #38bdf8",
-                background: "rgba(15, 23, 42, 0.6)",
-                borderRadius: "6px",
-                padding: "10px",
-                overflowX: "auto",
-              }}
-            >
-              {weatherData?.hourly?.wind_speed_10m
-                .slice(startIndex, endIndex)
-                .map((speed, i) => {
-                  const hgt = Math.min(Math.max(speed * 4, 10), 170);
-                  return (
-                    <div
-                      key={i}
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        minWidth: "32px",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "9px",
-                          color: "#38bdf8",
-                          fontWeight: "800",
-                          marginBottom: "4px",
-                        }}
-                      >
-                        {Math.round(speed)}
-                      </span>
-                      <div
-                        style={{
-                          width: "16px",
-                          height: `${hgt}px`,
-                          background: "linear-gradient(to top, #0284c7, #38bdf8)",
-                          borderRadius: "4px 4px 0 0",
-                          boxShadow: "0 0 8px rgba(56,189,248,0.5)",
-                        }}
-                      />
-                      <span
-                        style={{
-                          fontSize: "9px",
-                          color: "#94a3b8",
-                          marginTop: "6px",
-                          fontWeight: "700",
-                        }}
-                      >
-                        {i}h
-                      </span>
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
-                    </div>
-                  );
-                })}
+            <h3 style={{ marginTop: 0, color: "#67e8f9" }}>{t.graphTitle}</h3>
+            <p style={{ color: "#cbd5e1" }}>{t.graphDesc}</p>
+            <div className="chart-scroll">
+              <div style={{ minWidth: "760px", position: "relative", height: "300px", marginTop: "20px", borderLeft: "1px solid #334155", borderBottom: "1px solid #334155", padding: "10px 8px 28px" }}>
+                {(() => {
+                  const wind = getDaySlice("wind_speed_10m");
+                  const gust = getDaySlice("wind_gusts_10m");
+                  const max = Math.max(1, ...wind, ...gust);
+                  return wind.map((v, i) => {
+                    const g = gust[i] ?? v;
+                    return <div key={i} style={{position:"relative", display:"inline-flex", width:`${100/Math.max(wind.length,1)}%`, height:"250px", alignItems:"flex-end", justifyContent:"center", gap:"2px", verticalAlign:"bottom"}}>
+                      <div title={`${formatHour(weatherData.hourly.time[startIndex+i])}: ${Math.round(v)} ${speedUnit}`} style={{width:"42%", height:`${(v/max)*220}px`, background:"linear-gradient(to top,#0284c7,#67e8f9)", borderRadius:"4px 4px 0 0", minHeight:v>0?"3px":"0"}}/>
+                      <div title={`${formatHour(weatherData.hourly.time[startIndex+i])}: ${Math.round(g)} ${speedUnit}`} style={{width:"42%", height:`${(g/max)*220}px`, background:"linear-gradient(to top,#f97316,#facc15)", borderRadius:"4px 4px 0 0", minHeight:g>0?"3px":"0", opacity:.88}}/>
+                      <span style={{position:"absolute",bottom:"-22px",fontSize:"9px",color:"#94a3b8"}}>{i%3===0?formatHour(weatherData.hourly.time[startIndex+i]):""}</span>
+                    </div>;
+                  });
+                })()}
+              </div>
             </div>
+            <div style={{display:"flex",gap:"16px",marginTop:"24px",fontSize:"11px",fontWeight:800,color:"#cbd5e1"}}><span>▉ {t.windSpeed}</span><span style={{color:"#fdba74"}}>▉ {t.windGusts}</span></div>
           </div>
         )}
 
         {activeTab === "tides" && (
           <div className="tides-view">
-<<<<<<< HEAD
             <h3 style={{ marginTop: 0, color: "#0369a1" }}>{t.tidesTitle}</h3>
             <p style={{ color: "#334155" }}>{t.tidesDesc}</p>
-            <div style={{ marginTop: "20px", display: "grid", gap: "10px" }}>
-              <div style={{ background: "white", padding: "12px", borderRadius: "8px", borderLeft: "4px solid #0284c7" }}>
-                <strong>🌊 {t.highTide}:</strong> 04:12 & 16:45
-              </div>
-              <div style={{ background: "white", padding: "12px", borderRadius: "8px", borderLeft: "4px solid #f59e0b" }}>
-                <strong>🏖️ {t.lowTide}:</strong> 10:30 & 22:50
-=======
-            <h3 style={{ marginTop: 0, color: "#065f46", display: "flex", alignItems: "center", gap: "8px" }}>
-              <Waves size={20} color="#059669" />
-              🌊 {t.tidesTitle}
-            </h3>
-            <p style={{ color: "#047857", marginBottom: "20px" }}>
-              {t.tidesDesc}
-            </p>
-
-            <div className="tide-card">
-              <div style={{ fontSize: "28px" }}>⬆️</div>
-              <div>
-                <h4 style={{ margin: "0 0 4px 0", color: "#065f46", fontSize: "15px" }}>
-                  {t.highTide}
-                </h4>
-                <span style={{ fontSize: "13px", color: "#047857" }}>
-                  05:40 AM & 06:05 PM
-                </span>
-              </div>
+            <div className="chart-card" style={{marginTop:"16px"}}>
+              <div style={{fontWeight:900,color:"#0f172a",marginBottom:"5px"}}>🌊 {t.waveHeight} + {t.highTide}/{t.lowTide}</div>
+              {(() => {
+                const pts=getTideChartPoints();
+                if(!pts) return <div className="subtle">{t.noData}</div>;
+                const poly=pts.map(p=>`${p.x*7.6+20},${p.y*2.1+10}`).join(" ");
+                return <div className="chart-scroll"><svg className="tide-svg" viewBox="0 0 800 220" preserveAspectRatio="none">
+                  <defs><linearGradient id="tideFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#38bdf8" stopOpacity=".35"/><stop offset="100%" stopColor="#38bdf8" stopOpacity=".03"/></linearGradient></defs>
+                  <path d={`M20,195 L${poly} L780,195 Z`} fill="url(#tideFill)"/>
+                  <polyline points={poly} fill="none" stroke="#0284c7" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round"/>
+                  {pts.filter((_,i)=>i%3===0).map((p,i)=><text key={i} x={p.x*7.6+20} y="214" textAnchor="middle" fontSize="9" fill="#64748b">{p.time}</text>)}
+                </svg></div>;
+              })()}
             </div>
+            <div style={{ marginTop: "14px", display: "grid", gap: "10px" }}>
+              {(() => {
+                const tideEvents = getTideEvents();
+                const selectedDate =
+                  weatherData?.hourly?.time?.[startIndex]?.split("T")[0];
 
-            <div className="tide-card" style={{ background: "rgba(254,242,242,0.85)", borderColor: "#fecaca" }}>
-              <div style={{ fontSize: "28px" }}>⬇️</div>
-              <div>
-                <h4 style={{ margin: "0 0 4px 0", color: "#991b1b", fontSize: "15px" }}>
-                  {t.lowTide}
-                </h4>
-                <span style={{ fontSize: "13px", color: "#b91c1c" }}>
-                  11:50 AM & 12:15 AM
-                </span>
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
-              </div>
+                const dayEvents = tideEvents.filter(
+                  (event) => event.time?.startsWith(selectedDate)
+                );
+
+                const highEvents = dayEvents.filter((e) => e.type === "high");
+                const lowEvents = dayEvents.filter((e) => e.type === "low");
+
+                return (
+                  <>
+                    <div style={{
+                      background: "linear-gradient(135deg,#dbeafe,#e0f2fe)",
+                      padding: "12px",
+                      borderRadius: "8px",
+                      borderLeft: "4px solid #0284c7"
+                    }}>
+                      <strong>🌊 {t.highTide}:</strong>{" "}
+                      {highEvents.length
+                        ? highEvents.map((event, i) => (
+                            <span key={event.time}>
+                              {i > 0 ? "  •  " : ""}
+                              {event.time.split("T")[1]?.slice(0, 5)}
+                              {" "}
+                              <small>({event.level.toFixed(2)} m)</small>
+                            </span>
+                          ))
+                        : "-"}
+                    </div>
+
+                    <div style={{
+                      background: "linear-gradient(135deg,#fef3c7,#fde68a)",
+                      padding: "12px",
+                      borderRadius: "8px",
+                      borderLeft: "4px solid #f59e0b"
+                    }}>
+                      <strong>🏖️ {t.lowTide}:</strong>{" "}
+                      {lowEvents.length
+                        ? lowEvents.map((event, i) => (
+                            <span key={event.time}>
+                              {i > 0 ? "  •  " : ""}
+                              {event.time.split("T")[1]?.slice(0, 5)}
+                              {" "}
+                              <small>({event.level.toFixed(2)} m)</small>
+                            </span>
+                          ))
+                        : "-"}
+                    </div>
+
+                    {!weatherData?.hourly?.sea_level_height_msl && (
+                      <div style={{
+                        background: "#fff7ed",
+                        color: "#9a3412",
+                        padding: "10px",
+                        borderRadius: "8px",
+                        fontSize: "11px",
+                        fontWeight: "700"
+                      }}>
+                        لا تتوفر بيانات مستوى سطح البحر لهذا الموقع حالياً.
+                      </div>
+                    )}
+
+                    <div style={{
+                      fontSize: "10px",
+                      color: "#64748b",
+                      background: "#f8fafc",
+                      padding: "8px 10px",
+                      borderRadius: "6px"
+                    }}>
+                      ⚠️ هذه أوقات تقريبية مستخرجة من نموذج مستوى سطح البحر، وليست بديلاً عن جداول المد والجزر الرسمية للملاحة.
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
         )}
       </main>
 
-<<<<<<< HEAD
       {/* AD BANNER BOTTOM */}
       <div className="ad-wrapper" style={{ marginTop: "15px" }}>
         <AdBanner slotId="bottom-banner" />
       </div>
 
       {/* MODALS */}
-=======
-      {/* Modals */}
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
       {activeModal && (
         <div className="modal-overlay" onClick={() => setActiveModal(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <span>
-<<<<<<< HEAD
                 {activeModal === "spots" && t.spots}
                 {activeModal === "maps" && t.maps}
                 {activeModal === "archive" && t.archive}
                 {activeModal === "options" && t.optionsTitle}
-=======
-                {activeModal === "spots" && `📍 ${t.spots}`}
-                {activeModal === "maps" && `🗺️ ${t.maps}`}
-                {activeModal === "archive" && `📁 ${t.archive}`}
-                {activeModal === "options" && `⚙️ ${t.options}`}
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
               </span>
               <button
                 onClick={() => setActiveModal(null)}
@@ -1661,7 +1345,6 @@ export default function App() {
                 <X size={20} />
               </button>
             </div>
-<<<<<<< HEAD
             <div className="modal-body">
               {activeModal === "options" && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
@@ -1694,109 +1377,14 @@ export default function App() {
                       <option value="ms">m/s (متر/ثانية)</option>
                       <option value="mph">mph (ميل/ساعة)</option>
                     </select>
-=======
-
-            <div className="modal-body">
-              {activeModal === "spots" && (
-                <div>
-                  <h4 style={{ marginTop: 0 }}>Favorite Spots</h4>
-                  {favorites.map((fav, i) => (
-                    <div
-                      key={i}
-                      onClick={() => { selectFavorite(fav); setActiveModal(null); }}
-                      style={{
-                        padding: "10px 12px", background: "#f8fafc", border: "1px solid #e2e8f0",
-                        borderRadius: "6px", marginBottom: "8px", cursor: "pointer", fontWeight: "bold"
-                      }}
-                    >
-                      📍 {fav.name}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {activeModal === "maps" && (
-                <div>
-                  <h4 style={{ marginTop: 0 }}>Location Coordinates</h4>
-                  <div style={{ background: "#f1f5f9", padding: "12px", borderRadius: "6px", fontFamily: "monospace" }}>
-                    Latitude: {coords.lat}<br />
-                    Longitude: {coords.lon}
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
                   </div>
                 </div>
               )}
 
-<<<<<<< HEAD
               {activeModal !== "options" && (
                 <p style={{ textAlign: "center", color: "#64748b" }}>
                   الخدمة قيد التطوير وستكون متاحة قريباً.
                 </p>
-=======
-              {activeModal === "archive" && (
-                <div>
-                  <h4 style={{ marginTop: 0 }}>Archive & History</h4>
-                  <ul style={{ paddingLeft: "20px", color: "#334155" }}>
-                    <li>Current Spot: <b>{locationName}</b></li>
-                    <li>Home Spot: <b>{homeSpot.name}</b></li>
-                  </ul>
-                </div>
-              )}
-
-              {activeModal === "options" && (
-                <div>
-                  {/* اختيار اللغة */}
-                  <h4 style={{ marginTop: 0, display: "flex", alignItems: "center", gap: "6px" }}>
-                    <Globe size={18} color="#0284c7" />
-                    {t.selectLang}
-                  </h4>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px", marginBottom: "20px" }}>
-                    {[
-                      { code: "ar", label: "العربية 🇲🇦" },
-                      { code: "en", label: "English 🇬🇧" },
-                      { code: "fr", label: "Français 🇫🇷" },
-                      { code: "es", label: "Español 🇪🇸" },
-                      { code: "de", label: "Deutsch 🇩🇪" },
-                      { code: "it", label: "Italiano 🇮🇹" },
-                      { code: "ru", label: "Русский 🇷🇺" },
-                      { code: "zh", label: "中文 🇨🇳" },
-                    ].map((item) => (
-                      <button
-                        key={item.code}
-                        onClick={() => setLang(item.code)}
-                        style={{
-                          padding: "8px", borderRadius: "6px", cursor: "pointer", fontSize: "12px",
-                          background: lang === item.code ? "#0284c7" : "#e2e8f0",
-                          color: lang === item.code ? "white" : "#334155", border: 0, fontWeight: "bold"
-                        }}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* اختيار وحدات قياس الرياح */}
-                  <h4 style={{ marginTop: 0 }}>{t.selectSpeed}</h4>
-                  <div style={{ display: "flex", gap: "10px" }}>
-                    {[
-                      { unit: "kn", label: "Knots" },
-                      { unit: "kmh", label: "km/h" },
-                      { unit: "mph", label: "mph" },
-                    ].map((item) => (
-                      <button
-                        key={item.unit}
-                        onClick={() => setSpeedUnit(item.unit)}
-                        style={{
-                          padding: "8px 14px", borderRadius: "6px", cursor: "pointer",
-                          background: speedUnit === item.unit ? "#0284c7" : "#e2e8f0",
-                          color: speedUnit === item.unit ? "white" : "#334155", border: 0, fontWeight: "bold"
-                        }}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
->>>>>>> 887df1ef2f628466bb811b1e1f309777d7098b96
               )}
             </div>
           </div>
