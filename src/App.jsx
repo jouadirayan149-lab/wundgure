@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   Search,
   Compass,
+  CloudSun,
   Activity,
   Loader2,
   Star,
@@ -20,6 +21,44 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
+// تحسين البحث عن القرى والدواوير والمناطق الصغيرة في المغرب.
+// بعض قواعد البيانات تفهرس الاسم باللاتينية فقط، لذلك نبحث أيضاً بصيغة لاتينية تقريبية.
+const MOROCCO_SEARCH_ALIASES = {
+  "الغزوة": ["Ghazoua", "Ghazwa"],
+  "سميمو": ["Smimou", "Sidi Mbarek Smimou"],
+  "شيشاوة": ["Chichaoua"],
+};
+
+const arabicToLatinSearch = (value) => {
+  const map = {
+    "ا":"a","أ":"a","إ":"i","آ":"a","ء":"a","ؤ":"w","ئ":"y",
+    "ب":"b","ت":"t","ث":"th","ج":"j","ح":"h","خ":"kh","د":"d","ذ":"dh",
+    "ر":"r","ز":"z","س":"s","ش":"sh","ص":"s","ض":"d","ط":"t","ظ":"z",
+    "ع":"a","غ":"gh","ف":"f","ق":"q","ك":"k","ل":"l","م":"m","ن":"n",
+    "ه":"h","و":"w","ي":"y","ى":"a","ة":"a","پ":"p","ڤ":"v","گ":"g","چ":"ch"
+  };
+  return String(value || "")
+    .split("")
+    .map(ch => map[ch] ?? ch)
+    .join("")
+    .replace(/[ًٌٍَُِّْـ]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
+const buildMoroccoSearchVariants = (query) => {
+  const raw = String(query || "").trim();
+  if (!raw) return [];
+  const variants = [raw];
+  const normalized = raw.replace(/^ال/, "");
+  if (normalized && normalized !== raw) variants.push(normalized);
+  const aliases = MOROCCO_SEARCH_ALIASES[raw] || MOROCCO_SEARCH_ALIASES[normalized] || [];
+  variants.push(...aliases);
+  const latin = arabicToLatinSearch(raw);
+  if (latin && latin !== raw) variants.push(latin);
+  return [...new Set(variants.map(v => v.trim()).filter(Boolean))];
+};
+
 // قاموس الترجمات للغات المختلفة
 const translations = {
   ar: {
@@ -36,6 +75,7 @@ const translations = {
     forecast: "التوقعات",
     graph: "الرسم البياني",
     tides: "المد والأمواج",
+    earthquakes: "الزلازل",
     share: "مشاركة",
     selectDay: "اختر اليوم:",
     today: "اليوم",
@@ -74,16 +114,6 @@ const translations = {
     alertVisibility: "رؤية ضعيفة",
     alertHeat: "حرارة مرتفعة",
     alertUV: "مؤشر UV مرتفع",
-    liveDashboard: "لوحة الطقس الحية",
-    smartSummary: "الملخص الذكي",
-    nextHours: "الساعات القادمة",
-    stableWind: "الرياح مستقرة حالياً",
-    risingWind: "الرياح في ارتفاع تدريجي",
-    fallingWind: "الرياح في انخفاض تدريجي",
-    rainChance: "احتمال المطر",
-    maxWind: "أقصى رياح متوقعة",
-    minWind: "أدنى رياح متوقعة",
-    clearConditions: "الظروف مستقرة ولا توجد مؤشرات مهمة حالياً.",
     selectLang: "اختر لغة الموقع المفضلة:",
     selectSpeed: "اختر وحدة قياس سرعة الرياح:",
   },
@@ -101,6 +131,7 @@ const translations = {
     forecast: "Forecast",
     graph: "Graph",
     tides: "Tides & Waves",
+    earthquakes: "Earthquakes",
     share: "Share",
     selectDay: "Select Day:",
     today: "Today",
@@ -139,16 +170,6 @@ const translations = {
     alertVisibility: "Low visibility",
     alertHeat: "High temperature",
     alertUV: "High UV index",
-    liveDashboard: "Live Weather Dashboard",
-    smartSummary: "Smart Summary",
-    nextHours: "Next hours",
-    stableWind: "Wind is currently stable",
-    risingWind: "Wind is gradually increasing",
-    fallingWind: "Wind is gradually decreasing",
-    rainChance: "Rain chance",
-    maxWind: "Peak expected wind",
-    minWind: "Lowest expected wind",
-    clearConditions: "Conditions are stable with no important indicators right now.",
     selectLang: "Choose your preferred language:",
     selectSpeed: "Choose wind speed unit:",
   },
@@ -166,6 +187,7 @@ const translations = {
     forecast: "Prévisions",
     graph: "Graphique",
     tides: "Marées & Vagues",
+    earthquakes: "Séismes",
     share: "Partager",
     selectDay: "Choisir le jour :",
     today: "Aujourd'hui",
@@ -204,23 +226,212 @@ const translations = {
     alertVisibility: "Faible visibilité",
     alertHeat: "Température élevée",
     alertUV: "Indice UV élevé",
-    liveDashboard: "Tableau météo en direct",
-    smartSummary: "Résumé intelligent",
-    nextHours: "Prochaines heures",
-    stableWind: "Le vent est actuellement stable",
-    risingWind: "Le vent augmente progressivement",
-    fallingWind: "Le vent diminue progressivement",
-    rainChance: "Risque de pluie",
-    maxWind: "Vent maximal prévu",
-    minWind: "Vent minimal prévu",
-    clearConditions: "Les conditions sont stables sans indicateur important actuellement.",
     selectLang: "Choisissez votre langue préférée :",
     selectSpeed: "Choisissez l'unité de vitesse du vent :",
   },
 };
 
+// لائحة المدن المغربية المعروضة في قسم "مدن المغرب" في أسفل الموقع.
+const MOROCCO_CITIES = [
+    "أگادير",
+    "أكدز",
+    "آيت باها",
+    "آيت أورير",
+    "أکنول",
+    "الحسيمة",
+    "أمزميز",
+    "أرفود",
+    "أصيلة",
+    "أزمور",
+    "أزيلال",
+    "أزرو",
+    "عين بني مطهر",
+    "آيت ملول",
+    "بن جرير",
+    "بني ملال",
+    "بن سليمان",
+    "بركان",
+    "برشيد",
+    "بيوكرى",
+    "بني تجيت",
+    "بوعنان",
+    "بوعرفة",
+    "بوذنيب",
+    "بويزكارن",
+    "بوجدور",
+    "بومالن دادس",
+    "بوسكورة",
+    "الدار البيضاء",
+    "شفشاون",
+    "شيشاوة",
+    "الداخلة",
+    "دار بوعزة",
+    "الدشيرة الجهادية",
+    "دبدو",
+    "دمنات",
+    "الشماعية",
+    "الحاجب",
+    "الجديدة",
+    "الريش",
+    "الرشيدية",
+    "الصويرة",
+    "فاس",
+    "فكيك",
+    "الفقيه بن صالح",
+    "فم الجمعة",
+    "كلميمة",
+    "كلميم",
+    "جرسيف",
+    "إفران",
+    "إمنتانوت",
+    "إنزگان",
+    "قلعة مكونة",
+    "قلعة السراغنة",
+    "القنيطرة",
+    "الخميسات",
+    "خنيفرة",
+    "خريبكة",
+    "القصر الكبير",
+    "العيون",
+    "الكويرة",
+    "العرائش",
+    "مراكش",
+    "ماسّة",
+    "مكناس",
+    "مليليه",
+    "ميضار",
+    "ميدلت",
+    "ميسور",
+    "المحمدية",
+    "الناظور",
+    "ورزازات",
+    "واد زم",
+    "وزان",
+    "وجدة",
+    "أولاد تايمة",
+    "الرباط",
+    "الريصاني",
+    "الرماني",
+    "آسفي",
+    "سلا",
+    "سبت جزولة",
+    "صفرو",
+    "سطات",
+    "سيدي الزوين",
+    "سيدي بنّور",
+    "سيدي بوعثمان",
+    "سيدي مختار",
+    "سيدي إيفني",
+    "سيدي قاسم",
+    "سيدي رحُال",
+    "سيدي سليمان",
+    "سكورة",
+    "السمارة",
+    "سوق الأربعاء",
+    "أولاد النمة",
+    "تافراوت",
+    "تحناوت",
+    "تالوين",
+    "تالسينت",
+    "تامنار",
+    "تملالت",
+    "طانطان",
+    "طنجة",
+    "تاونات",
+    "تاوريرت",
+    "طرفاية",
+    "تارجيست",
+    "تارودانت",
+    "طاطا",
+    "تازة",
+    "تمارة",
+    "تندرارة",
+    "تطوان",
+    "تنجداد",
+    "تنغير",
+    "تزنيت",
+    "اليوسفية",
+    "زاكورة",
+    "زايو"
+];
+
+
+// إحداثيات ثابتة للمدن المغربية المعروضة في القسم السفلي.
+// هذا يمنع اختفاء الإحصائيات بسبب اختلاف كتابة اسم المدينة في خدمات الـGeocoding.
+const MOROCCO_CITY_COORDS = {
+  "أگادير": [30.4278, -9.5981], "أكدز": [30.6936, -6.4466], "آيت باها": [30.0693, -9.1521], "آيت أورير": [31.5644, -7.6628],
+  "أکنول": [34.6496, -3.8631], "الحسيمة": [35.2517, -3.9372], "أمزميز": [31.2167, -8.2500], "أرفود": [31.4340, -4.2320],
+  "أصيلة": [35.4653, -6.0342], "أزمور": [33.2895, -8.3420], "أزيلال": [31.9669, -6.5694], "أزرو": [33.4344, -5.2213],
+  "عين بني مطهر": [34.0889, -2.0247], "آيت ملول": [30.3342, -9.4972], "بن جرير": [32.2300, -7.9500], "بني ملال": [32.3394, -6.3608],
+  "بن سليمان": [33.6200, -7.1300], "بركان": [34.9200, -2.3200], "برشيد": [33.2650, -7.5870], "بيوكرى": [30.2130, -9.3690],
+  "بني تجيت": [32.2833, -3.4833], "بوعنان": [32.0275, -3.0400], "بوعرفة": [32.5330, -1.9640], "بوذنيب": [31.9500, -3.6100],
+  "بويزكارن": [29.2030, -9.3700], "بوجدور": [26.1250, -14.4840], "بومالن دادس": [31.3725, -5.9950], "بوسكورة": [33.4500, -7.6500],
+  "الدار البيضاء": [33.5731, -7.5898], "شفشاون": [35.1688, -5.2636], "شيشاوة": [31.5430, -8.7600], "الداخلة": [23.6848, -15.9579],
+  "دار بوعزة": [33.5300, -7.8500], "الدشيرة الجهادية": [30.5500, -9.7000], "دبدو": [33.9830, -3.0400], "دمنات": [31.7300, -7.0050],
+  "الشماعية": [32.0510, -8.4000], "الحاجب": [33.6870, -5.3710], "الجديدة": [33.2316, -8.5007], "الريش": [32.8180, -4.4890],
+  "الرشيدية": [31.9314, -4.4240], "الصويرة": [31.5125, -9.7700], "فاس": [34.0331, -5.0003], "فكيك": [32.1080, -1.2290],
+  "الفقيه بن صالح": [32.5020, -6.6900], "فم الجمعة": [32.2180, -6.7230], "كلميمة": [31.6800, -4.8200], "كلميم": [28.9870, -10.0570],
+  "جرسيف": [34.2250, -3.3530], "إفران": [33.5228, -5.1100], "إمنتانوت": [31.1770, -8.8440], "إنزگان": [30.3550, -9.5370],
+  "قلعة مكونة": [31.2450, -6.0600], "قلعة السراغنة": [32.0570, -7.4050], "القنيطرة": [34.2610, -6.5802], "الخميسات": [33.8240, -6.0660],
+  "خنيفرة": [32.9390, -5.6680], "خريبكة": [32.8850, -6.9060], "القصر الكبير": [35.0000, -5.9000], "العيون": [27.1536, -13.2033],
+  "الكويرة": [21.5000, -17.0500], "العرائش": [35.1932, -6.1557], "مراكش": [31.6295, -7.9811], "ماسّة": [30.0041, -9.6375],
+  "مكناس": [33.8935, -5.5473], "مليليه": [35.2923, -2.9381], "ميضار": [34.9400, -3.5300], "ميدلت": [32.6850, -4.7450],
+  "ميسور": [33.0470, -4.9920], "المحمدية": [33.6861, -7.3830], "الناظور": [35.1681, -2.9335], "ورزازات": [30.9335, -6.9370],
+  "واد زم": [32.8627, -6.5736], "وزان": [34.7958, -5.5785], "وجدة": [34.6814, -1.9086], "أولاد تايمة": [30.3940, -9.2080],
+  "الرباط": [34.0133, -6.8326], "الريصاني": [31.2800, -4.2700], "الرماني": [33.5280, -6.6070], "آسفي": [32.2994, -9.2372],
+  "سلا": [34.0531, -6.7985], "سبت جزولة": [32.8620, -9.1800], "صفرو": [33.8300, -4.8350], "سطات": [33.0010, -7.6200],
+  "سيدي الزوين": [31.5700, -8.9600], "سيدي بنّور": [32.6500, -8.4300], "سيدي بوعثمان": [31.9000, -8.9700], "سيدي مختار": [31.5500, -9.3000],
+  "سيدي إيفني": [29.3800, -10.1700], "سيدي قاسم": [34.2200, -5.7000], "سيدي رحُال": [33.4900, -7.4700], "سيدي سليمان": [34.2600, -5.9300],
+  "سكورة": [31.0630, -6.5500], "السمارة": [26.7384, -11.6719], "سوق الأربعاء": [34.6850, -5.7100], "أولاد النمة": [32.3000, -6.6800],
+  "تافراوت": [29.7200, -8.9700], "تحناوت": [31.3620, -8.0880], "تالوين": [30.5290, -7.9250], "تالسينت": [32.5300, -2.6800],
+  "تامنار": [31.0800, -9.7100], "تملالت": [31.7300, -8.1400], "طانطان": [28.4380, -11.1030], "طنجة": [35.7673, -5.7998],
+  "تاونات": [34.5360, -4.6400], "تاوريرت": [34.4070, -2.8930], "طرفاية": [27.9400, -12.9260], "تارجيست": [34.9370, -4.3180],
+  "تارودانت": [30.4700, -8.8800], "طاطا": [29.7450, -7.9700], "تازة": [34.2130, -4.0100], "تمارة": [33.9287, -6.9066],
+  "تندرارة": [34.7800, -2.0000], "تطوان": [35.5785, -5.3684], "تنجداد": [31.5150, -5.5300], "تنغير": [31.5150, -5.5320],
+  "تزنيت": [29.6974, -9.7316], "اليوسفية": [32.2460, -8.5300], "زاكورة": [30.3300, -5.8400], "زايو": [34.9420, -2.7320]
+};
+
+const MOROCCO_CITY_FRENCH = {
+  "أگادير": "Agadir", "أكدز": "Agdz", "آيت باها": "Ait Baha", "آيت أورير": "Ait Ourir", "أکنول": "Aknoul",
+  "الحسيمة": "Al Hoceima", "أمزميز": "Amizmiz", "أرفود": "Erfoud", "أصيلة": "Asilah", "أزمور": "Azemmour",
+  "أزيلال": "Azilal", "أزرو": "Azrou", "عين بني مطهر": "Ain Beni Mathar", "آيت ملول": "Ait Melloul", "بن جرير": "Ben Guerir",
+  "بني ملال": "Beni Mellal", "بن سليمان": "Benslimane", "بركان": "Berkane", "برشيد": "Berrechid", "بيوكرى": "Biougra",
+  "بني تجيت": "Beni Tajjite", "بوعنان": "Bouanane", "بوعرفة": "Bouarfa", "بوذنيب": "Boudnib", "بويزكارن": "Bouizakarne",
+  "بوجدور": "Boujdour", "بومالن دادس": "Boumalne Dades", "بوسكورة": "Bouskoura", "الدار البيضاء": "Casablanca", "شفشاون": "Chefchaouen",
+  "شيشاوة": "Chichaoua", "الداخلة": "Dakhla", "دار بوعزة": "Dar Bouazza", "الدشيرة الجهادية": "Dcheira", "دبدو": "Debdou",
+  "دمنات": "Demnate", "الشماعية": "Chemaia", "الحاجب": "El Hajeb", "الجديدة": "El Jadida", "الريش": "Er-Rich",
+  "الرشيدية": "Errachidia", "الصويرة": "Essaouira", "فاس": "Fes", "فكيك": "Figuig", "الفقيه بن صالح": "Fquih Ben Salah",
+  "فم الجمعة": "Foum Jemaa", "كلميمة": "Goulmima", "كلميم": "Guelmim", "جرسيف": "Guercif", "إفران": "Ifrane",
+  "إمنتانوت": "Imintanoute", "إنزگان": "Inezgane", "قلعة مكونة": "Kalaat M'Gouna", "قلعة السراغنة": "El Kelaa des Sraghna", "القنيطرة": "Kenitra",
+  "الخميسات": "Khemisset", "خنيفرة": "Khenifra", "خريبكة": "Khouribga", "القصر الكبير": "Ksar El Kebir", "العيون": "Laayoune",
+  "الكويرة": "Lagouira", "العرائش": "Larache", "مراكش": "Marrakech", "ماسّة": "Massa", "مكناس": "Meknes",
+  "مليليه": "Melilla", "ميضار": "Midar", "ميدلت": "Midelt", "ميسور": "Missour", "المحمدية": "Mohammedia",
+  "الناظور": "Nador", "ورزازات": "Ouarzazate", "واد زم": "Oued Zem", "وزان": "Ouazzane", "وجدة": "Oujda",
+  "أولاد تايمة": "Ouled Teima", "الرباط": "Rabat", "الريصاني": "Rissani", "الرماني": "Rommani", "آسفي": "Safi",
+  "سلا": "Sale", "سبت جزولة": "Sebt Gzoula", "صفرو": "Sefrou", "سطات": "Settat", "سيدي الزوين": "Sidi Zouine",
+  "سيدي بنّور": "Sidi Bennour", "سيدي بوعثمان": "Sidi Bou Othmane", "سيدي مختار": "Sidi Mokhtar", "سيدي إيفني": "Sidi Ifni", "سيدي قاسم": "Sidi Kacem",
+  "سيدي رحُال": "Sidi Rahhal", "سيدي سليمان": "Sidi Slimane", "سكورة": "Skoura", "السمارة": "Smara", "سوق الأربعاء": "Souk El Arbaa",
+  "أولاد النمة": "Ouled Nemma", "تافراوت": "Tafraoute", "تحناوت": "Tahannaout", "تالوين": "Taliouine", "تالسينت": "Talsint",
+  "تامنار": "Tamanar", "تملالت": "Tamallalt", "طانطان": "Tan-Tan", "طنجة": "Tangier", "تاونات": "Taounate", "تاوريرت": "Taourirt",
+  "طرفاية": "Tarfaya", "تارجيست": "Targuist", "تارودانت": "Taroudant", "طاطا": "Tata", "تازة": "Taza", "تمارة": "Temara",
+  "تندرارة": "Tendrara", "تطوان": "Tetouan", "تنجداد": "Tingdad", "تنغير": "Tinghir", "تزنيت": "Tiznit", "اليوسفية": "Youssoufia",
+  "زاكورة": "Zagora", "زايو": "Zaio"
+};
+
+const normalizeCitySearch = (value) => String(value || "")
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/[’'`]/g, "")
+  .replace(/[^\p{L}\p{N}]+/gu, " ")
+  .trim()
+  .toLocaleLowerCase();
+
 export default function App() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [moroccoCityQuery, setMoroccoCityQuery] = useState("");
+  const [moroccoWeather, setMoroccoWeather] = useState({});
+  const [moroccoWeatherLoading, setMoroccoWeatherLoading] = useState(false);
+
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [searchSuggestionsLoading, setSearchSuggestionsLoading] = useState(false);
   const [locationName, setLocationName] = useState("Morocco - Casablanca");
@@ -236,7 +447,6 @@ export default function App() {
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [liveSecond, setLiveSecond] = useState(0);
   const [graphHover, setGraphHover] = useState(null);
-  const [selectedTimelineOffset, setSelectedTimelineOffset] = useState(0);
 
   const [speedUnit, setSpeedUnit] = useState(() => {
     try {
@@ -278,6 +488,7 @@ export default function App() {
   }, []);
 
   const [activeModal, setActiveModal] = useState(null);
+  const [selectedMoroccoCity, setSelectedMoroccoCity] = useState(null);
 
   const [archive, setArchive] = useState(() => {
     try {
@@ -412,7 +623,7 @@ export default function App() {
     try {
       // 1. جلب بيانات الطقس والرياح
       const weatherRes = await fetch(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_gusts_10m,wind_direction_10m,cloud_cover,uv_index,visibility,precipitation,precipitation_probability,weather_code&hourly=temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_gusts_10m,wind_direction_10m,cloud_cover,uv_index,visibility,precipitation,precipitation_probability,weather_code&daily=sunrise,sunset&wind_speed_unit=${speedUnit}&timezone=auto`
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_gusts_10m,wind_direction_10m,cloud_cover,uv_index,visibility&hourly=temperature_2m,relative_humidity_2m,pressure_msl,wind_speed_10m,wind_gusts_10m,wind_direction_10m,cloud_cover,uv_index,visibility&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,sunrise,sunset&forecast_days=15&wind_speed_unit=${speedUnit}&timezone=auto`
       );
       const data = await weatherRes.json();
 
@@ -482,20 +693,28 @@ export default function App() {
         const language = lang === "ar" ? "ar" : lang === "fr" ? "fr" : "en";
         const encodedQuery = encodeURIComponent(query);
 
-        const [openMeteoResult, nominatimResult] = await Promise.allSettled([
+        const searchVariants = buildMoroccoSearchVariants(query);
+        const openMeteoRequests = searchVariants.map((variant) =>
           fetch(
-            `https://geocoding-api.open-meteo.com/v1/search?name=${encodedQuery}&count=20&language=${language}&format=json`
-          ).then((res) => res.json()),
+            `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(variant + ", Morocco")}&count=50&language=${language}&countryCode=MA&format=json`
+          ).then((res) => res.json())
+        );
+        const nominatimRequests = searchVariants.map((variant) =>
           fetch(
-            `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=20&accept-language=${language},ar,en&q=${encodedQuery}`
-          ).then((res) => res.json()),
+            `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=40&countrycodes=ma&accept-language=${language},ar,en&q=${encodeURIComponent(variant)}`
+          ).then((res) => res.json())
+        );
+        const [openMeteoResults, nominatimResults] = await Promise.all([
+          Promise.allSettled(openMeteoRequests),
+          Promise.allSettled(nominatimRequests),
         ]);
 
         if (cancelled) return;
 
         const combined = [];
 
-        if (openMeteoResult.status === "fulfilled") {
+        openMeteoResults.forEach((openMeteoResult) => {
+          if (openMeteoResult.status !== "fulfilled") return;
           const items = Array.isArray(openMeteoResult.value?.results)
             ? openMeteoResult.value.results
             : [];
@@ -517,9 +736,10 @@ export default function App() {
               source: "open-meteo",
             });
           });
-        }
+        });
 
-        if (nominatimResult.status === "fulfilled") {
+        nominatimResults.forEach((nominatimResult) => {
+          if (nominatimResult.status !== "fulfilled") return;
           const items = Array.isArray(nominatimResult.value)
             ? nominatimResult.value
             : [];
@@ -538,7 +758,12 @@ export default function App() {
               address.municipality ||
               address.hamlet ||
               address.suburb ||
+              address.neighbourhood ||
               query;
+            const placeType =
+              place.type ||
+              place.addresstype ||
+              (address.village ? "village" : address.hamlet ? "hamlet" : address.town ? "town" : "place");
 
             combined.push({
               id: `nom-${place.osm_type || "place"}-${place.osm_id || index}-${latitude}-${longitude}`,
@@ -548,16 +773,11 @@ export default function App() {
               country: address.country || "",
               country_code: address.country_code || "",
               admin1: address.state || address.region || address.province || "",
-              type:
-                place.type ||
-                place.addresstype ||
-                address.village && "village" ||
-                address.hamlet && "hamlet" ||
-                "place",
+              type: placeType,
               source: "nominatim",
             });
           });
-        }
+        });
 
         // إزالة النتائج المتكررة حسب الاسم + الإحداثيات التقريبية.
         const unique = new Map();
@@ -615,6 +835,615 @@ export default function App() {
     await fetchWeather(lat, lon);
   };
 
+  const selectMoroccoCity = async (cityName) => {
+    const query = String(cityName || "").trim();
+    if (!query) return;
+
+    setSelectedMoroccoCity(query);
+    setSelectedDayIndex(0);
+
+    const coordsPair = MOROCCO_CITY_COORDS[query];
+    if (Array.isArray(coordsPair) && coordsPair.length === 2) {
+      const lat = Number(coordsPair[0]);
+      const lon = Number(coordsPair[1]);
+      const name = lang === "fr" ? (MOROCCO_CITY_FRENCH[query] || query) : query;
+      setLoading(true);
+      try {
+        setCoords({ lat, lon });
+        setLocationName(`Morocco - ${name}`);
+        setSelectedDayIndex(0);
+        setMoroccoCityQuery("");
+        addToArchive({ name: `Morocco - ${name}`, lat, lon });
+        await fetchWeather(lat, lon);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // احتياط إضافي إذا أضيفت مدينة جديدة ولم تكن لها إحداثيات ثابتة.
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=10&language=${lang}&format=json`
+      );
+      const data = await res.json();
+      const results = Array.isArray(data.results) ? data.results : [];
+      const result = results.find((item) => String(item.country_code || "").toUpperCase() === "MA") || results[0];
+      if (!result || !Number.isFinite(Number(result.latitude)) || !Number.isFinite(Number(result.longitude))) throw new Error("City not found");
+      await selectSearchSuggestion({ latitude: Number(result.latitude), longitude: Number(result.longitude), name: result.name || query, country: result.country || "Morocco" });
+      setMoroccoCityQuery("");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err) {
+      console.warn("Morocco city selection warning:", err);
+      alert(isRtl ? `لم يتم العثور على مدينة: ${query}` : lang === "fr" ? `Ville introuvable : ${query}` : `City not found: ${query}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // حالة الطقس حسب weather_code من Open-Meteo
+  const getMoroccoWeatherInfo = (code) => {
+    const weatherMap = {
+      0:  { icon: "☀️", ar: "صافي", en: "Clear", fr: "Dégagé" },
+      1:  { icon: "🌤️", ar: "صافي غالباً", en: "Mainly clear", fr: "Plutôt dégagé" },
+      2:  { icon: "⛅", ar: "غائم جزئياً", en: "Partly cloudy", fr: "Partiellement nuageux" },
+      3:  { icon: "☁️", ar: "غائم", en: "Overcast", fr: "Couvert" },
+      45: { icon: "🌫️", ar: "ضباب", en: "Fog", fr: "Brouillard" },
+      48: { icon: "🌫️", ar: "ضباب كثيف", en: "Rime fog", fr: "Brouillard givrant" },
+      51: { icon: "🌦️", ar: "رذاذ خفيف", en: "Light drizzle", fr: "Bruine légère" },
+      53: { icon: "🌦️", ar: "رذاذ متوسط", en: "Moderate drizzle", fr: "Bruine modérée" },
+      55: { icon: "🌧️", ar: "رذاذ قوي", en: "Dense drizzle", fr: "Forte bruine" },
+      61: { icon: "🌧️", ar: "مطر خفيف", en: "Light rain", fr: "Pluie légère" },
+      63: { icon: "🌧️", ar: "مطر متوسط", en: "Moderate rain", fr: "Pluie modérée" },
+      65: { icon: "🌧️", ar: "مطر غزير", en: "Heavy rain", fr: "Forte pluie" },
+      71: { icon: "🌨️", ar: "ثلج خفيف", en: "Light snow", fr: "Neige légère" },
+      73: { icon: "❄️", ar: "ثلج متوسط", en: "Moderate snow", fr: "Neige modérée" },
+      75: { icon: "❄️", ar: "ثلج كثيف", en: "Heavy snow", fr: "Forte neige" },
+      80: { icon: "🌦️", ar: "زخات مطر", en: "Rain showers", fr: "Averses" },
+      81: { icon: "🌧️", ar: "زخات متوسطة", en: "Moderate showers", fr: "Averses modérées" },
+      82: { icon: "⛈️", ar: "زخات قوية", en: "Violent showers", fr: "Fortes averses" },
+      85: { icon: "🌨️", ar: "زخات ثلج", en: "Snow showers", fr: "Averses de neige" },
+      86: { icon: "❄️", ar: "ثلج قوي", en: "Heavy snow showers", fr: "Fortes averses de neige" },
+      95: { icon: "⛈️", ar: "عاصفة رعدية", en: "Thunderstorm", fr: "Orage" },
+      96: { icon: "⛈️", ar: "عاصفة مع برد", en: "Thunderstorm + hail", fr: "Orage + grêle" },
+      99: { icon: "⛈️", ar: "عاصفة وبرد قوي", en: "Heavy thunderstorm", fr: "Fort orage" },
+    };
+    const item = weatherMap[Number(code)] || { icon: "🌤️", ar: "غير معروف", en: "Unknown", fr: "Inconnu" };
+    return { icon: item.icon, label: lang === "fr" ? item.fr : lang === "en" ? item.en : item.ar };
+  };
+
+  // جلب الطقس لجميع المدن باستعمال إحداثيات ثابتة.
+  // Open-Meteo يدعم عدة إحداثيات في طلب واحد، لذلك لا نحتاج Geocoding لكل مدينة.
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadMoroccoCitiesWeather = async () => {
+      setMoroccoWeatherLoading(true);
+      const weatherResults = {};
+      try {
+        const validCities = MOROCCO_CITIES
+          .map((city) => {
+            const point = MOROCCO_CITY_COORDS[city];
+            return point ? { city, lat: point[0], lon: point[1] } : null;
+          })
+          .filter(Boolean);
+
+        for (let i = 0; i < validCities.length; i += 40) {
+          if (cancelled) return;
+          const batch = validCities.slice(i, i + 40);
+          const latitudes = batch.map((item) => item.lat).join(',');
+          const longitudes = batch.map((item) => item.lon).join(',');
+
+          const response = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${latitudes}&longitude=${longitudes}&current=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m,pressure_msl,precipitation,precipitation_probability&timezone=auto`
+          );
+
+          if (!response.ok) throw new Error(`Weather API ${response.status}`);
+          const data = await response.json();
+          const weatherArray = Array.isArray(data) ? data : [data];
+
+          batch.forEach((item, index) => {
+            const current = weatherArray[index]?.current;
+            if (current && Number.isFinite(Number(current.temperature_2m))) {
+              weatherResults[item.city] = {
+                temperature: Number(current.temperature_2m),
+                weatherCode: Number(current.weather_code),
+                humidity: Number(current.relative_humidity_2m),
+                wind: Number(current.wind_speed_10m),
+                pressure: Number(current.pressure_msl),
+                precipitation: Number(current.precipitation || 0),
+                precipitationProbability: Number(current.precipitation_probability || 0),
+              };
+            }
+          });
+        }
+
+        if (!cancelled) setMoroccoWeather(weatherResults);
+      } catch (error) {
+        console.warn('Morocco cities weather warning:', error);
+        if (!cancelled) setMoroccoWeather(weatherResults);
+      } finally {
+        if (!cancelled) setMoroccoWeatherLoading(false);
+      }
+    };
+
+    loadMoroccoCitiesWeather();
+    const interval = setInterval(loadMoroccoCitiesWeather, 10 * 60 * 1000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
+  // 🌍 مراقب الزلازل العالمي — معلومات مباشرة من USGS + الدولة والعلم
+  useEffect(() => {
+    const listElement = document.getElementById('wg-earthquake-list');
+    const alertElement = document.getElementById('wg-earthquake-alert');
+    const countElement = document.getElementById('wg-earthquake-count');
+  const tabCountElement = document.getElementById('wg-earthquake-tab-count');
+    const notifyBtn = document.getElementById('wg-earthquake-notify-btn');
+    if (!listElement) return;
+
+    let cancelled = false;
+    let timer = null;
+    let firstLoad = true;
+    const knownIds = new Set();
+    const countryCache = new Map();
+
+    const formatTime = (ms) => {
+      try { return new Date(ms).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }); }
+      catch (_) { return new Date(ms).toLocaleString(); }
+    };
+
+    const escapeHtml = (value) => String(value ?? '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+
+    const flagFromIso = (iso) => {
+      const code = String(iso || '').trim().toUpperCase();
+      if (!/^[A-Z]{2}$/.test(code)) return '🌍';
+      return String.fromCodePoint(...[...code].map((c) => 127397 + c.charCodeAt(0)));
+    };
+
+    const magnitudeClass = (mag) => {
+      if (mag >= 6) return 'wg-eq-mag-critical';
+      if (mag >= 5) return 'wg-eq-mag-high';
+      if (mag >= 4) return 'wg-eq-mag-medium';
+      if (mag >= 3) return 'wg-eq-mag-low';
+      return 'wg-eq-mag-small';
+    };
+
+    const getPlaceParts = (place) => {
+      const clean = String(place || 'منطقة غير محددة').trim();
+      const ofParts = clean.split(/\s+of\s+/i);
+      const locationPart = ofParts.length > 1 ? ofParts[ofParts.length - 1].trim() : clean;
+      const distancePart = ofParts.length > 1 ? ofParts.slice(0, -1).join(' of ') : '';
+      return { locationPart, distancePart };
+    };
+
+    const getCountry = async (quake) => {
+      const coords = quake?.geometry?.coordinates || [];
+      const lat = Number(coords[1]);
+      const lon = Number(coords[0]);
+      const key = quake?.id || `${lat.toFixed(3)}:${lon.toFixed(3)}`;
+      if (countryCache.has(key)) return countryCache.get(key);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) return { name: 'دولة غير محددة', iso: '', flag: '🌍' };
+      try {
+        const res = await fetch(`https://earthquake.usgs.gov/ws/geoserve/regions.json?latitude=${lat}&longitude=${lon}&type=admin`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`USGS regions ${res.status}`);
+        const data = await res.json();
+        const admin = data?.admin?.features?.[0]?.properties || data?.admin?.features?.[0]?.properties || {};
+        const name = admin.country || admin.country_name || 'دولة غير محددة';
+        const iso = admin.iso || admin.country_code || '';
+        const result = { name, iso, flag: flagFromIso(iso) };
+        countryCache.set(key, result);
+        return result;
+      } catch (_) {
+        return { name: 'منطقة دولية / بحر', iso: '', flag: '🌍' };
+      }
+    };
+
+    const showAlert = (quake, country) => {
+      if (!quake) return;
+      const mag = Number(quake.properties?.mag);
+      const place = quake.properties?.place || 'منطقة غير محددة';
+      const depth = Number(quake.geometry?.coordinates?.[2]);
+      const title = `زلزال جديد — M${Number.isFinite(mag) ? mag.toFixed(1) : '?'}`;
+      const details = `${country?.flag || '🌍'} ${country?.name || 'دولة غير محددة'} · ${place} · ${Number.isFinite(depth) ? depth.toFixed(1) + ' km' : 'العمق غير متوفر'} · ${formatTime(quake.properties?.time)}`;
+      if (alertElement) {
+        alertElement.innerHTML = `<span class="wg-eq-alert-icon">⚠️</span><div><strong>${escapeHtml(title)}</strong><span>${escapeHtml(details)}</span></div><button type="button" class="wg-eq-alert-close" aria-label="إغلاق">×</button>`;
+        alertElement.classList.add('show');
+        const close = alertElement.querySelector('.wg-eq-alert-close');
+        if (close) close.onclick = () => alertElement.classList.remove('show');
+        clearTimeout(showAlert._timer);
+        showAlert._timer = setTimeout(() => alertElement.classList.remove('show'), 15000);
+      }
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try { new Notification(`⚠️ ${title}`, { body: details, tag: `windgure-earthquake-${quake.id || Date.now()}` }); } catch (_) {}
+      }
+    };
+
+    const requestNotifications = async () => {
+      if (!('Notification' in window)) return;
+      try {
+        const permission = await Notification.requestPermission();
+        if (notifyBtn) notifyBtn.textContent = permission === 'granted' ? '🔔 التنبيهات مفعلة' : '🔔 تفعيل التنبيهات';
+        if (alertElement) {
+          alertElement.innerHTML = permission === 'granted'
+            ? '<span class="wg-eq-alert-icon">🔔</span><div><strong>تم تفعيل تنبيهات الزلازل</strong><span>غادي يوصلك إشعار عند اكتشاف زلزال جديد.</span></div>'
+            : '<span class="wg-eq-alert-icon">🔕</span><div><strong>التنبيهات غير مفعلة</strong><span>يمكنك تفعيلها من إعدادات المتصفح.</span></div>';
+          alertElement.classList.add('show');
+          clearTimeout(requestNotifications._timer);
+          requestNotifications._timer = setTimeout(() => alertElement.classList.remove('show'), 5000);
+        }
+      } catch (_) {}
+    };
+
+    const updateNotificationButton = () => {
+      if (!notifyBtn) return;
+      if (!('Notification' in window)) { notifyBtn.textContent = '🔕 غير مدعوم'; notifyBtn.disabled = true; return; }
+      notifyBtn.textContent = Notification.permission === 'granted' ? '🔔 التنبيهات مفعلة' : '🔔 تفعيل التنبيهات';
+    };
+
+    const loadLeaflet = () => new Promise((resolve, reject) => {
+      if (window.L) return resolve(window.L);
+      const existing = document.getElementById('wg-earthquake-leaflet-js');
+      if (existing) {
+        existing.addEventListener('load', () => resolve(window.L), { once: true });
+        existing.addEventListener('error', reject, { once: true });
+        return;
+      }
+      const css = document.getElementById('wg-earthquake-leaflet-css') || document.createElement('link');
+      css.id = 'wg-earthquake-leaflet-css';
+      css.rel = 'stylesheet';
+      css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      if (!css.parentNode) document.head.appendChild(css);
+      const script = document.createElement('script');
+      script.id = 'wg-earthquake-leaflet-js';
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.async = true;
+      script.onload = () => resolve(window.L);
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+
+    const openEarthquakeLocation = async (quake) => {
+      const modal = document.getElementById('wg-earthquake-location-modal');
+      const mapElement = document.getElementById('wg-earthquake-detail-map');
+      if (!modal || !mapElement || !quake) return;
+
+      const coords = quake.geometry?.coordinates || [];
+      const lon = Number(coords[0]);
+      const lat = Number(coords[1]);
+      const depth = Number(coords[2]);
+      const mag = Number(quake.properties?.mag);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+      const country = await getCountry(quake);
+      const place = quake.properties?.place || 'منطقة غير محددة';
+      const detailMag = document.getElementById('wg-eq-detail-mag');
+      const detailCountry = document.getElementById('wg-eq-detail-country');
+      const detailPlace = document.getElementById('wg-eq-detail-place');
+      const detailDepth = document.getElementById('wg-eq-detail-depth');
+      const detailCoords = document.getElementById('wg-eq-detail-coords');
+      const detailTime = document.getElementById('wg-eq-detail-time');
+      const detailTsunami = document.getElementById('wg-eq-detail-tsunami');
+      const detailUsps = document.getElementById('wg-eq-detail-usgs');
+
+      if (detailMag) detailMag.textContent = `M${Number.isFinite(mag) ? mag.toFixed(1) : '?'}`;
+      if (detailCountry) detailCountry.textContent = `${country?.flag || '🌍'} ${country?.name || 'دولة غير محددة'}`;
+      if (detailPlace) detailPlace.textContent = place;
+      if (detailDepth) detailDepth.textContent = Number.isFinite(depth) ? `${depth.toFixed(1)} km` : '—';
+      if (detailCoords) detailCoords.textContent = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+      if (detailTime) detailTime.textContent = formatTime(quake.properties?.time);
+      if (detailTsunami) detailTsunami.textContent = Number(quake.properties?.tsunami) === 1 ? '🌊 Tsunami signal' : '✓ No tsunami signal';
+      if (detailUsps) detailUsps.href = quake.properties?.url || 'https://earthquake.usgs.gov/earthquakes/map/';
+
+      modal.classList.add('show');
+      document.body.classList.add('wg-earthquake-modal-open');
+
+      try {
+        const L = await loadLeaflet();
+        if (cancelled || !L) return;
+        if (window.wgEarthquakeDetailMap) {
+          window.wgEarthquakeDetailMap.remove();
+          window.wgEarthquakeDetailMap = null;
+        }
+        const map = L.map(mapElement, { zoomControl: true, attributionControl: true, scrollWheelZoom: true }).setView([lat, lon], 7);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // خريطة حقيقية: النقطة نفسها هي الإحداثيات الرسمية للزلزال من USGS.
+        const color = mag >= 6 ? '#991b1b' : mag >= 5 ? '#dc2626' : mag >= 4 ? '#f97316' : '#eab308';
+        const radius = Math.max(9, Math.min(22, 8 + (Number.isFinite(mag) ? mag * 2 : 8)));
+        const epicentre = L.latLng(lat, lon);
+        L.circle(epicentre, {
+          radius: Math.max(2500, Math.min(18000, radius * 900)),
+          color,
+          weight: 2,
+          fillColor: color,
+          fillOpacity: 0.10
+        }).addTo(map);
+        L.circleMarker(epicentre, {
+          radius: Math.min(16, radius / 1.2),
+          color: '#ffffff',
+          weight: 3,
+          fillColor: color,
+          fillOpacity: 1
+        }).addTo(map)
+          .bindTooltip(`Epicentre · M${Number.isFinite(mag) ? mag.toFixed(1) : '?'}`, { direction: 'top', offset: [0, -10] })
+          .bindPopup(`<div style="font-family:Arial,sans-serif;min-width:190px"><strong style="font-size:18px;color:${color}">M${Number.isFinite(mag) ? mag.toFixed(1) : '?'}</strong><br><b>📍 ${escapeHtml(place)}</b><br><span>↕️ Profondeur: ${Number.isFinite(depth) ? depth.toFixed(1) : '—'} km</span><br><span>🌐 ${lat.toFixed(5)}, ${lon.toFixed(5)}</span></div>`)
+          .openPopup();
+        L.control.scale({ imperial: false, position: 'bottomleft' }).addTo(map);
+        window.wgEarthquakeDetailMap = map;
+        setTimeout(() => {
+          map.invalidateSize();
+          map.setView(epicentre, 8, { animate: false });
+        }, 180);
+      } catch (err) {
+        console.warn('Windgure earthquake detail map warning:', err);
+        mapElement.innerHTML = '<div class="wg-earthquake-map-error">تعذر تحميل الخريطة. الإحداثيات مازالت ظاهرة فوق.</div>';
+      }
+    };
+
+    const closeEarthquakeLocation = () => {
+      const modal = document.getElementById('wg-earthquake-location-modal');
+      if (modal) modal.classList.remove('show');
+      document.body.classList.remove('wg-earthquake-modal-open');
+      if (window.wgEarthquakeDetailMap) {
+        window.wgEarthquakeDetailMap.remove();
+        window.wgEarthquakeDetailMap = null;
+      }
+    };
+
+    const bindEarthquakeRows = (quakeById) => {
+      listElement.querySelectorAll('.wg-earthquake-card').forEach((row) => {
+        const handler = () => {
+          const quake = quakeById.get(row.dataset.earthquakeId);
+          if (quake) openEarthquakeLocation(quake);
+        };
+        row.addEventListener('click', handler);
+        row.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            handler();
+          }
+        });
+      });
+    };
+
+    const renderQuakes = async (data) => {
+      if (cancelled) return;
+      const features = Array.isArray(data?.features) ? data.features : [];
+      // ترتيب الزلازل من الأقوى إلى الأضعف حسب مقدار الزلزال (Magnitude).
+      // عند تساوي القوة، الأحدث يظهر أولاً.
+      const sorted = [...features].sort((a, b) => {
+        const magA = Number(a.properties?.mag);
+        const magB = Number(b.properties?.mag);
+        const safeA = Number.isFinite(magA) ? magA : -Infinity;
+        const safeB = Number.isFinite(magB) ? magB : -Infinity;
+        if (safeB !== safeA) return safeB - safeA;
+        return Number(b.properties?.time || 0) - Number(a.properties?.time || 0);
+      });
+      // نعرض أقوى 12 زلزالاً في القائمة، وليس آخر 12 حسب الوقت.
+      const visible = sorted.slice(0, 12);
+      if (countElement) countElement.textContent = `${features.length} زلزال · آخر 24 ساعة`;
+    if (tabCountElement) tabCountElement.textContent = features.length;
+
+      if (!visible.length) {
+        listElement.innerHTML = '<div class="wg-earthquake-empty">🌍 لا توجد زلازل مسجلة حالياً في البيانات المتاحة.</div>';
+      } else {
+        const enriched = await Promise.all(visible.map(async (quake) => ({ quake, country: await getCountry(quake) })));
+        if (cancelled) return;
+        listElement.innerHTML = enriched.map(({ quake, country }) => {
+          const mag = Number(quake.properties?.mag);
+          const place = quake.properties?.place || 'منطقة غير محددة';
+          const { locationPart, distancePart } = getPlaceParts(place);
+          const depth = Number(quake.geometry?.coordinates?.[2]);
+          const coords = quake.geometry?.coordinates || [];
+          const lon = Number(coords[0]);
+          const lat = Number(coords[1]);
+          const tsunami = Number(quake.properties?.tsunami) === 1;
+          const alert = quake.properties?.alert;
+          const detailUrl = quake.properties?.url || 'https://earthquake.usgs.gov/earthquakes/map/';
+          return `<article class="wg-earthquake-card" data-earthquake-id="${escapeHtml(quake.id || '')}" tabindex="0" role="button" aria-label="عرض موقع الزلزال ${escapeHtml(place)}">
+            <div class="wg-eq-left"><div class="wg-eq-magnitude ${magnitudeClass(mag)}">M${Number.isFinite(mag) ? mag.toFixed(1) : '?'}</div><span class="wg-eq-time">${escapeHtml(formatTime(quake.properties?.time))}</span></div>
+            <div class="wg-eq-main">
+              <div class="wg-eq-country"><span class="wg-eq-flag" aria-hidden="true">${country.flag}</span><div><strong>${escapeHtml(country.name)}</strong><span>${escapeHtml(locationPart)}</span></div></div>
+              <div class="wg-eq-place">${escapeHtml(distancePart ? distancePart + ' — ' + locationPart : place)}</div>
+              <div class="wg-eq-meta"><span>↕️ <b>${Number.isFinite(depth) ? depth.toFixed(1) + ' km' : '—'}</b></span><span>🌐 <b>${Number.isFinite(lat) && Number.isFinite(lon) ? lat.toFixed(2) + ', ' + lon.toFixed(2) : '—'}</b></span><span>${tsunami ? '🌊 <b>Tsunami</b>' : `● <b>${escapeHtml(alert || 'Surveillance')}</b>`}</span></div>
+            </div>
+            <a class="wg-eq-usgs" href="${escapeHtml(detailUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Détails USGS">USGS ↗</a>
+          </article>`;
+        }).join('');
+        const quakeById = new Map(enriched.map(({ quake }) => [quake.id, quake]));
+        bindEarthquakeRows(quakeById);
+
+        if (!firstLoad) {
+          const fresh = features.filter((q) => q.id && !knownIds.has(q.id));
+          if (fresh.length) {
+            const newest = fresh.sort((a, b) => Number(b.properties?.time || 0) - Number(a.properties?.time || 0))[0];
+            const country = await getCountry(newest);
+            if (!cancelled) showAlert(newest, country);
+          }
+        }
+      }
+
+      features.forEach((q) => { if (q.id) knownIds.add(q.id); });
+      firstLoad = false;
+    };
+
+    const refresh = async () => {
+      try {
+        const res = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson', { cache: 'no-store' });
+        if (!res.ok) throw new Error(`USGS ${res.status}`);
+        await renderQuakes(await res.json());
+      } catch (err) {
+        console.warn('Windgure earthquake feed warning:', err);
+        if (countElement) countElement.textContent = 'تعذر تحديث بيانات الزلازل';
+      if (tabCountElement) tabCountElement.textContent = '—';
+        if (listElement) listElement.innerHTML = '<div class="wg-earthquake-empty">⚠️ تعذر جلب بيانات الزلازل حالياً. حاول بعد قليل.</div>';
+      }
+    };
+
+    updateNotificationButton();
+    if (notifyBtn && !notifyBtn._wgBound) { notifyBtn.addEventListener('click', requestNotifications); notifyBtn._wgBound = true; }
+    const closeLocationButton = document.getElementById('wg-earthquake-location-close');
+    const locationModal = document.getElementById('wg-earthquake-location-modal');
+    const onCloseLocation = () => closeEarthquakeLocation();
+    if (closeLocationButton && !closeLocationButton._wgBound) { closeLocationButton.addEventListener('click', onCloseLocation); closeLocationButton._wgBound = true; }
+    if (locationModal && !locationModal._wgBound) {
+      locationModal.addEventListener('click', (event) => { if (event.target === locationModal) closeEarthquakeLocation(); });
+      locationModal._wgBound = true;
+    }
+    refresh();
+    timer = setInterval(refresh, 60000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+      if (notifyBtn && notifyBtn._wgBound) { notifyBtn.removeEventListener('click', requestNotifications); notifyBtn._wgBound = false; }
+      closeEarthquakeLocation();
+    };
+  }, [activeTab]);
+
+  // بحث مباشر في أي مكان بالمغرب: مدينة، قرية، دوار أو منطقة صغيرة.
+  // لا نعتمد فقط على MOROCCO_CITIES. نبحث في Open-Meteo + Nominatim ثم
+  // نختار أفضل نتيجة مغربية ونفتح طقسها مباشرة.
+  const searchAnyMoroccoPlace = async (placeName) => {
+    const query = String(placeName || "").trim();
+    if (query.length < 2) return;
+
+    setLoading(true);
+    try {
+      const normalize = normalizeCitySearch;
+      const q = normalize(query);
+      let candidates = [];
+
+      // 1) Open-Meteo: أكثر من لغة + فلترة المغرب.
+      const languages = ["ar", "fr", "en"];
+      await Promise.all(languages.map(async (language) => {
+        try {
+          const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=100&language=${language}&format=json&countryCode=MA`;
+          const res = await fetch(url);
+          if (!res.ok) return;
+          const data = await res.json();
+          if (Array.isArray(data.results)) candidates.push(...data.results);
+        } catch (err) {
+          console.warn("Open-Meteo Morocco geocoding warning:", err);
+        }
+      }));
+
+      // 2) Nominatim دائماً، وليس فقط عندما يفشل Open-Meteo.
+      // هذا مهم للقرى والدواوير والأسماء المحلية الصغيرة.
+      try {
+        const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&namedetails=1&limit=30&accept-language=ar,fr,en&countrycodes=ma&q=${encodeURIComponent(query)}`;
+        const res = await fetch(nominatimUrl, {
+          headers: { Accept: "application/json" },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            candidates.push(...data.map((item) => ({
+              name: item.name || item.display_name?.split(",")[0]?.trim() || query,
+              latitude: Number(item.lat),
+              longitude: Number(item.lon),
+              country: "المغرب",
+              country_code: "MA",
+              admin1: item.address?.state || item.address?.region || "",
+              admin2: item.address?.province || item.address?.county || "",
+              timezone: "Africa/Casablanca",
+              elevation: null,
+              feature_code: item.type || item.class || "",
+              display_name: item.display_name || query,
+              namedetails: item.namedetails || {},
+            })));
+          }
+        }
+      } catch (err) {
+        console.warn("Nominatim Morocco geocoding warning:", err);
+      }
+
+      // 3) إذا لم توجد نتيجة مغربية، نعيد المحاولة بدون countryCode ثم نختار المغرب إن وجد.
+      if (candidates.length === 0) {
+        try {
+          const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=100&language=en&format=json`;
+          const res = await fetch(url);
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data.results)) candidates.push(...data.results);
+          }
+        } catch (err) {
+          console.warn("Open-Meteo global geocoding fallback warning:", err);
+        }
+      }
+
+      // إزالة التكرار.
+      const unique = [];
+      const seen = new Set();
+      candidates.forEach((item) => {
+        const lat = Number(item.latitude);
+        const lon = Number(item.longitude);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+        const countryCode = String(item.country_code || "").toUpperCase();
+        const isMorocco = countryCode === "MA" || String(item.country || "").toLowerCase().includes("morocc") || String(item.country || "").includes("المغرب");
+        if (!isMorocco) return;
+        const key = `${lat.toFixed(5)},${lon.toFixed(5)}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          unique.push({ ...item, latitude: lat, longitude: lon, country_code: "MA" });
+        }
+      });
+
+      if (unique.length === 0) {
+        alert(isRtl ? `ما لقيتش المكان «${query}». جرّب الاسم بالفرنسية أو الإنجليزية.` : lang === "fr" ? `Lieu introuvable : ${query}. Essayez aussi le nom français ou anglais.` : `لم يتم العثور على المكان: ${query}`);
+        return;
+      }
+
+      // ترتيب النتائج: تطابق الاسم أولاً، ثم بداية الاسم، ثم الاحتواء.
+      const scored = unique.map((item) => {
+        const names = [
+          item.name,
+          item.display_name,
+          item.namedetails?.name,
+          item.namedetails?.['name:ar'],
+          item.namedetails?.['name:fr'],
+          item.namedetails?.['name:en'],
+        ].filter(Boolean).map(normalize);
+        let score = 0;
+        if (names.some((n) => n === q)) score += 1000;
+        if (names.some((n) => n.startsWith(q))) score += 500;
+        if (names.some((n) => n.includes(q))) score += 200;
+        // نعطي أفضلية للأماكن المأهولة على الطرق/المعالم عندما تكون الأسماء متساوية.
+        const feature = String(item.feature_code || "").toUpperCase();
+        if (/PPL|PPLA|PPLA2|PPLA3|PPLC/.test(feature)) score += 80;
+        return { item, score };
+      }).sort((a, b) => b.score - a.score);
+
+      const result = scored[0].item;
+      const resultName = result.name || result.display_name?.split(",")[0]?.trim() || query;
+
+      // فتح طقس المكان مباشرة + نقل الخريطة/الموقع إليه عبر coords.
+      await selectSearchSuggestion({
+        latitude: Number(result.latitude),
+        longitude: Number(result.longitude),
+        name: resultName,
+        country: "Morocco",
+      });
+      setMoroccoCityQuery("");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err) {
+      console.error("Any Morocco place search failed:", err);
+      alert(isRtl ? `تعذر البحث عن: ${query}` : lang === "fr" ? `Recherche impossible : ${query}` : `تعذر البحث عن: ${query}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSearch = async (e) => {
     e.preventDefault();
     const query = searchQuery.trim();
@@ -632,40 +1461,49 @@ export default function App() {
       // البحث أولاً عبر Open-Meteo بعدة نتائج وباللغة المختارة.
       // هذا مهم خصوصاً للمدن المكتوبة بالعربية مثل: الدار البيضاء، الرباط، طنجة...
       let results = [];
-      try {
-        const language = lang === "ar" ? "ar" : lang === "fr" ? "fr" : "en";
-        const res = await fetch(
-          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
-            query
-          )}&count=10&language=${language}&format=json`
-        );
-        const data = await res.json();
-        results = Array.isArray(data.results) ? data.results : [];
-      } catch (openMeteoErr) {
-        console.warn("Open-Meteo search warning:", openMeteoErr);
+      const language = lang === "ar" ? "ar" : lang === "fr" ? "fr" : "en";
+      const searchVariants = buildMoroccoSearchVariants(query);
+
+      // نبحث بكل الصيغ: الاسم الأصلي، بدون "الـ"، الاسم اللاتيني والمرادفات المعروفة.
+      for (const variant of searchVariants) {
+        try {
+          const res = await fetch(
+            `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(variant + ", Morocco")}&count=50&language=${language}&countryCode=MA&format=json`
+          );
+          const data = await res.json();
+          if (Array.isArray(data.results)) results.push(...data.results);
+        } catch (openMeteoErr) {
+          console.warn("Open-Meteo search warning:", openMeteoErr);
+        }
       }
 
-      // إذا لم يجد Open-Meteo المدينة بالعربية، نستعمل Nominatim كبحث احتياطي.
-      // هذا يحسن البحث بالأسماء العربية والمحلية للمدن.
+      // Nominatim يبقى احتياطياً مهماً للقرى والدواوير التي لا تكون مفهرسة في Open-Meteo.
       if (results.length === 0) {
         try {
-          const nominatimRes = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=10&accept-language=ar,en&q=${encodeURIComponent(
-              query
-            )}`
+          const nominatimResponses = await Promise.allSettled(
+            searchVariants.map((variant) =>
+              fetch(
+                `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=40&countrycodes=ma&accept-language=${lang === "ar" ? "ar,en" : lang === "fr" ? "fr,ar,en" : "en,ar"}&q=${encodeURIComponent(variant)}`
+              ).then((res) => res.json())
+            )
           );
-          const nominatimData = await nominatimRes.json();
 
-          results = (Array.isArray(nominatimData) ? nominatimData : [])
+          const nominatimData = nominatimResponses.flatMap((r) =>
+            r.status === "fulfilled" && Array.isArray(r.value) ? r.value : []
+          );
+
+          results = nominatimData
             .map((place) => ({
               latitude: Number(place.lat),
               longitude: Number(place.lon),
               name:
-                place.address?.city ||
-                place.address?.town ||
-                place.address?.municipality ||
-                place.address?.village ||
                 place.name ||
+                place.address?.village ||
+                place.address?.hamlet ||
+                place.address?.town ||
+                place.address?.city ||
+                place.address?.municipality ||
+                place.address?.suburb ||
                 query,
               country: place.address?.country || "",
               country_code: place.address?.country_code || "",
@@ -680,8 +1518,28 @@ export default function App() {
         }
       }
 
+      // إزالة التكرار وإعطاء الأولوية للنتائج التي تطابق الاسم أو تبدأ به.
+      const uniqueResults = [];
+      const seenResults = new Set();
+      for (const item of results) {
+        const lat = Number(item.latitude);
+        const lon = Number(item.longitude);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+        const key = `${String(item.name || "").trim().toLocaleLowerCase()}|${lat.toFixed(3)}|${lon.toFixed(3)}`;
+        if (!seenResults.has(key)) { seenResults.add(key); uniqueResults.push(item); }
+      }
+      const qLower = query.toLocaleLowerCase();
+      uniqueResults.sort((a, b) => {
+        const aName = String(a.name || "").toLocaleLowerCase();
+        const bName = String(b.name || "").toLocaleLowerCase();
+        const aScore = aName === qLower ? 0 : aName.startsWith(qLower) ? 1 : aName.includes(qLower) ? 2 : 3;
+        const bScore = bName === qLower ? 0 : bName.startsWith(qLower) ? 1 : bName.includes(qLower) ? 2 : 3;
+        return aScore - bScore;
+      });
+      results = uniqueResults;
+
       if (results.length > 0) {
-        // نختار النتيجة الأولى، لكن نعرض اسم المدينة بشكل أوضح.
+        // نختار النتيجة الأولى، لكن نعرض اسم المكان بشكل أوضح.
         const spot = results[0];
         const newCoords = {
           lat: Number(spot.latitude),
@@ -762,7 +1620,7 @@ export default function App() {
             ? t.tomorrow
             : dayDate,
       });
-      if (daysMap.length >= 7) break;
+      if (daysMap.length >= 15) break;
     }
     return daysMap;
   };
@@ -943,12 +1801,6 @@ export default function App() {
   const liveCloudCover = typeof weatherData?.current?.cloud_cover === "number"
     ? weatherData.current.cloud_cover
     : interpolate(weatherData?.hourly?.cloud_cover);
-  const livePrecipitation = typeof weatherData?.current?.precipitation === "number"
-    ? weatherData.current.precipitation
-    : interpolate(weatherData?.hourly?.precipitation, 0);
-  const liveRainProbability = typeof weatherData?.current?.precipitation_probability === "number"
-    ? weatherData.current.precipitation_probability
-    : interpolate(weatherData?.hourly?.precipitation_probability, 0);
   const liveSeaTemp = interpolate(weatherData?.hourly?.sea_surface_temperature);
 
   const formatVisibility = (meters) => {
@@ -968,80 +1820,6 @@ export default function App() {
   if (typeof liveVisibility === "number" && liveVisibility < 3000) smartAlerts.push({ icon: "👁️", text: t.alertVisibility, value: formatVisibility(liveVisibility), level: "medium" });
   if (typeof liveTemperature === "number" && liveTemperature >= 35) smartAlerts.push({ icon: "🌡️", text: t.alertHeat, value: `${Math.round(liveTemperature)}°C`, level: "medium" });
   if (typeof liveUv === "number" && liveUv >= 8) smartAlerts.push({ icon: "☀️", text: t.alertUV, value: `UV ${Number(liveUv).toFixed(1)}`, level: "medium" });
-
-  const timelineItems = Array.from({ length: 12 }, (_, offset) => {
-    const index = Math.min(liveHourIndex + offset, (weatherData?.hourly?.time?.length || 1) - 1);
-    const time = weatherData?.hourly?.time?.[index]?.split("T")[1]?.slice(0, 5) || "--:--";
-    return {
-      index,
-      time,
-      wind: weatherData?.hourly?.wind_speed_10m?.[index],
-      gust: weatherData?.hourly?.wind_gusts_10m?.[index],
-      temp: weatherData?.hourly?.temperature_2m?.[index],
-      rain: weatherData?.hourly?.precipitation_probability?.[index],
-      wave: weatherData?.hourly?.wave_height?.[index],
-      dir: weatherData?.hourly?.wind_direction_10m?.[index],
-    };
-  });
-
-  // الملخص الذكي يعتمد على الساعات القادمة فعلياً، وليس على قراءة ثابتة واحدة.
-  // لذلك يتغير تلقائياً عندما ينتقل مؤشر NOW إلى ساعة جديدة أو تتغير التوقعات.
-  const selectedTimelineItem = timelineItems[selectedTimelineOffset] || timelineItems[0];
-  const summaryWindow = timelineItems.slice(selectedTimelineOffset, Math.min(selectedTimelineOffset + 6, timelineItems.length));
-  const firstFuture = summaryWindow.find((item) => typeof item.wind === "number");
-  const lastFuture = [...summaryWindow].reverse().find((item) => typeof item.wind === "number");
-  const futureWindValues = summaryWindow
-    .map((item) => Number(item.wind))
-    .filter((value) => Number.isFinite(value));
-  const futureTempValues = summaryWindow
-    .map((item) => Number(item.temp))
-    .filter((value) => Number.isFinite(value));
-
-  const currentWindForSummary = Number(selectedTimelineItem?.wind);
-  const futureWindForSummary = Number(firstFuture?.wind);
-  const endWindForSummary = Number(lastFuture?.wind);
-  const windDelta = Number.isFinite(currentWindForSummary) && Number.isFinite(endWindForSummary)
-    ? endWindForSummary - currentWindForSummary
-    : 0;
-
-  const windTrendText = windDelta > 2
-    ? t.risingWind
-    : windDelta < -2
-    ? t.fallingWind
-    : t.stableWind;
-
-  const strongestFutureWind = futureWindValues.length ? Math.max(...futureWindValues) : null;
-  const weakestFutureWind = futureWindValues.length ? Math.min(...futureWindValues) : null;
-  const futureTempStart = futureTempValues[0];
-  const futureTempEnd = futureTempValues[futureTempValues.length - 1];
-  const tempDelta = Number.isFinite(futureTempStart) && Number.isFinite(futureTempEnd)
-    ? futureTempEnd - futureTempStart
-    : 0;
-
-  const summaryParts = [];
-  if (smartAlerts.length > 0) summaryParts.push(`${smartAlerts[0].text} ·`);
-  summaryParts.push(windTrendText);
-
-  if (Number.isFinite(futureWindForSummary) && Number.isFinite(endWindForSummary)) {
-    summaryParts.push(`${Math.round(currentWindForSummary)} → ${Math.round(endWindForSummary)} ${speedUnit}`);
-  }
-
-  if (Number.isFinite(strongestFutureWind) && strongestFutureWind > currentWindForSummary + 2) {
-    summaryParts.push(`${t.maxWind}: ${Math.round(strongestFutureWind)} ${speedUnit}`);
-  } else if (Number.isFinite(weakestFutureWind) && weakestFutureWind < currentWindForSummary - 2) {
-    summaryParts.push(`${t.minWind}: ${Math.round(weakestFutureWind)} ${speedUnit}`);
-  }
-
-  if (Number.isFinite(tempDelta) && Math.abs(tempDelta) >= 2) {
-    summaryParts.push(`${t.temp}: ${tempDelta > 0 ? "+" : ""}${Math.round(tempDelta)}°C`);
-  }
-
-  const selectedRain = Number(selectedTimelineItem?.rain);
-  if (Number.isFinite(selectedRain)) summaryParts.push(`${t.rainChance}: ${Math.round(selectedRain)}%`);
-  const selectedTemp = Number(selectedTimelineItem?.temp);
-  if (Number.isFinite(selectedTemp)) summaryParts.push(`${t.temp}: ${Math.round(selectedTemp)}°C`);
-
-  const summaryText = summaryParts.join(" · ");
 
   return (
     <div className="wg-app" dir={isRtl ? "rtl" : "ltr"}>
@@ -1166,10 +1944,26 @@ export default function App() {
         .set-home-link:hover { background: #e2e8f0; }
         .loading { display: flex; align-items: center; gap: 7px; color: #0891b2; font-weight: 800; white-space: nowrap; }
         
+        .wg-15day-panel { max-width:1800px; margin:12px auto 0; padding:14px; background:linear-gradient(135deg,#07111f,#102a43 55%,#063b4c); border:1px solid rgba(34,211,238,.28); border-radius:14px; box-shadow:0 10px 28px rgba(15,23,42,.15); color:white; }
+        .wg-15day-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:11px; }
+        .wg-15day-title { font-size:14px; font-weight:900; } .wg-15day-subtitle { color:#bae6fd; font-size:9px; margin-top:3px; }
+        .wg-15day-badge { background:#0891b2; color:white; border:1px solid #67e8f9; border-radius:999px; padding:5px 10px; font-size:10px; font-weight:900; }
+        .wg-15day-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px; }
+        .wg-15day-card { border:1px solid rgba(125,211,252,.18); background:rgba(15,23,42,.5); color:white; border-radius:10px; padding:7px 6px; cursor:pointer; text-align:center; min-height:125px; transition:.15s ease; }
+        .wg-15day-card:hover { transform:translateY(-2px); background:rgba(14,165,233,.18); border-color:rgba(34,211,238,.55); } .wg-15day-card-active { border-color:#22d3ee; box-shadow:0 0 0 2px rgba(34,211,238,.18); background:rgba(14,165,233,.22); }
+        .wg-15day-date { font-size:11px; font-weight:900; color:#e0f2fe; } .wg-15day-icon { font-size:23px; line-height:1; margin:8px 0 4px; }
+        .wg-15day-condition { color:#bae6fd; font-size:10px; font-weight:800; min-height:24px; } .wg-15day-temp { margin-top:5px; font-size:12px; color:#e2e8f0; } .wg-15day-temp strong { color:#67e8f9; font-size:16px; }
+        .wg-15day-rain,.wg-15day-wind { margin-top:5px; color:#cbd5e1; font-size:9px; font-weight:800; } .wg-15day-loading { grid-column:1/-1; text-align:center; padding:25px; color:#bae6fd; }
+
         .tabs { background: #e2e8f0; border-bottom: 1px solid #cbd5e1; padding: 6px 14px; display: flex; gap: 5px; overflow-x: auto; white-space: nowrap; }
-        .tab { border: 0; background: transparent; color: #334155; padding: 7px 11px; border-radius: 5px; cursor: pointer; font-weight: 600; }
+        .tab { border: 0; background: transparent; color: #334155; padding: 7px 11px; border-radius: 7px; cursor: pointer; font-weight: 600; display:flex; align-items:center; gap:6px; }
         .tab:hover { background: #cbd5e1; }
         .tab-active { background: white; color: #0f172a; box-shadow: 0 1px 3px rgba(0,0,0,.15); font-weight: 900; }
+        .earthquake-tab { display:flex; align-items:center; gap:6px; }
+        .earthquake-tab-count { min-width:18px; height:18px; padding:0 5px; display:inline-flex; align-items:center; justify-content:center; border-radius:999px; background:#fee2e2; color:#b91c1c; font-size:9px; font-weight:950; }
+        .earthquake-tab.tab-active .earthquake-tab-count { background:#ef4444; color:#fff; }
+        .wg-earthquake-tab-view { margin-top:0; padding-top:2px; }
+
         
         .days-bar {
           background: #e2e8f0; padding: 8px 14px; display: flex; gap: 6px; align-items: center; border-bottom: 1px solid #cbd5e1; overflow-x: auto;
@@ -1192,69 +1986,45 @@ export default function App() {
         .direction { background: #ddd6fe; color: #5b21b6; font-size: 17px; font-weight: 900; }
         .mobile-hint { display: none; }
 
-        
-        .pro-dashboard { margin: 8px; border: 1px solid #bae6fd; border-radius: 12px; background: linear-gradient(135deg,#ffffff,#f0f9ff); box-shadow: 0 4px 14px rgba(15,23,42,.07); overflow: hidden; }
-        .pro-dashboard-head { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border-bottom:1px solid #dbeafe; }
-        .pro-dashboard-title { font-size:14px; font-weight:950; color:#0f172a; }
-        .pro-live-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 8px; border-radius:999px; background:#ecfdf5; color:#047857; font-size:9px; font-weight:900; }
-        .pro-live-dot { width:7px; height:7px; border-radius:50%; background:#10b981; box-shadow:0 0 0 4px rgba(16,185,129,.12); }
-        .pro-summary { display:grid; grid-template-columns:minmax(230px,.8fr) minmax(0,2.2fr); gap:10px; padding:10px; }
-        .smart-summary { border:1px solid #dbeafe; border-radius:9px; padding:10px; background:#fff; }
-        .smart-summary-label { color:#0369a1; font-size:10px; font-weight:900; }
-        .smart-summary-text { margin-top:6px; font-size:13px; line-height:1.5; font-weight:900; color:#0f172a; }
-        .summary-stats { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
-        .summary-stat { padding:5px 7px; border-radius:7px; background:#f8fafc; border:1px solid #e2e8f0; font-size:9px; font-weight:900; color:#334155; }
-        .hourly-timeline { min-width:0; border:1px solid #dbeafe; border-radius:9px; background:#fff; padding:8px; overflow:hidden; }
-        .timeline-head { display:flex; align-items:center; justify-content:space-between; font-size:10px; font-weight:900; color:#334155; margin-bottom:7px; }
-        .timeline-scroll { display:grid; grid-template-columns:repeat(12,minmax(64px,1fr)); gap:5px; overflow-x:auto; padding-bottom:2px; }
-        .timeline-item { min-width:64px; border:1px solid #e2e8f0; border-radius:8px; padding:6px 4px; text-align:center; background:linear-gradient(180deg,#f8fafc,#fff); cursor:pointer; font:inherit; color:inherit; transition:.15s; }
-        .timeline-item:hover { transform:translateY(-2px); box-shadow:0 4px 10px rgba(15,23,42,.10); }
-        .timeline-item.selected { border-color:#0284c7; background:#eff6ff; box-shadow:0 0 0 2px rgba(2,132,199,.15); }
-        .timeline-item.now { border-color:#22d3ee; box-shadow:inset 0 2px 0 #22d3ee; background:#ecfeff; }
-        .timeline-time { font-size:9px; font-weight:950; color:#475569; }
-        .timeline-wind { margin-top:4px; font-size:13px; font-weight:950; color:#0369a1; }
-        .timeline-temp { font-size:9px; font-weight:800; color:#64748b; margin-top:2px; }
-        .timeline-meta { display:flex; justify-content:center; gap:4px; flex-wrap:wrap; margin-top:4px; font-size:8px; color:#475569; font-weight:800; }
-        .timeline-rain { color:#0284c7; }
-.weather-tools-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8px; padding:8px; }
+        .weather-tools-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8px; padding:8px; }
         .wind-compass-panel {
-          min-height:150px; padding:10px 14px; border:1px solid #bae6fd; border-radius:10px;
+          min-height:118px; padding:8px 10px; border:1px solid #bae6fd; border-radius:10px;
           background:linear-gradient(145deg,#ffffff,#e0f2fe); box-shadow:0 3px 10px rgba(15,23,42,.07);
-          display:flex; align-items:center; justify-content:space-between; gap:12px;
+          display:flex; align-items:center; justify-content:space-between; gap:8px;
         }
         .compass-info { min-width:0; flex:1; }
-        .tool-title { font-size:14px; font-weight:950; color:#0f172a; }
-        .tool-subtitle { margin-top:3px; color:#64748b; font-size:10px; }
-        .wind-compass { width:108px; height:108px; flex:0 0 108px; border-radius:50%; position:relative;
-          margin: auto; border: 8px solid #dbeafe; background: radial-gradient(circle,#fff 0%,#f0f9ff 65%,#dbeafe 100%);
+        .tool-title { font-size:12px; font-weight:950; color:#0f172a; }
+        .tool-subtitle { margin-top:3px; color:#64748b; font-size:9px; }
+        .wind-compass { width:92px; height:92px; flex:0 0 92px; border-radius:50%; position:relative;
+          margin: auto; border: 6px solid #dbeafe; background: radial-gradient(circle,#fff 0%,#f0f9ff 65%,#dbeafe 100%);
           box-shadow: inset 0 0 0 2px #93c5fd, 0 8px 20px rgba(2,132,199,.15); }
         .wind-compass::before, .wind-compass::after { content:""; position:absolute; background:#cbd5e1; }
         .wind-compass::before { width:1px; height:100%; left:50%; top:0; }
         .wind-compass::after { height:1px; width:100%; top:50%; left:0; }
-        .compass-label { position:absolute; font-size:12px; font-weight:900; color:#0f172a; z-index:2; }
-        .compass-n { top:8px; left:50%; transform:translateX(-50%); color:#dc2626; }
-        .compass-e { right:10px; top:50%; transform:translateY(-50%); }
-        .compass-s { bottom:8px; left:50%; transform:translateX(-50%); }
-        .compass-w { left:10px; top:50%; transform:translateY(-50%); }
-        .compass-needle { position:absolute; left:50%; top:50%; width:5px; height:40px; transform-origin:50% 100%;
-          margin-left:-2.5px; margin-top:-40px; border-radius:6px; background:linear-gradient(#ef4444 0 50%,#0f172a 50%);
+        .compass-label { position:absolute; font-size:10px; font-weight:900; color:#0f172a; z-index:2; }
+        .compass-n { top:5px; left:50%; transform:translateX(-50%); color:#dc2626; }
+        .compass-e { right:6px; top:50%; transform:translateY(-50%); }
+        .compass-s { bottom:5px; left:50%; transform:translateX(-50%); }
+        .compass-w { left:6px; top:50%; transform:translateY(-50%); }
+        .compass-needle { position:absolute; left:50%; top:50%; width:4px; height:34px; transform-origin:50% 100%;
+          margin-left:-2px; margin-top:-34px; border-radius:6px; background:linear-gradient(#ef4444 0 50%,#0f172a 50%);
           box-shadow:0 2px 6px rgba(0,0,0,.25); transition:transform .8s cubic-bezier(.2,.8,.2,1); z-index:3; }
-        .compass-center { position:absolute; width:16px; height:16px; left:50%; top:50%; transform:translate(-50%,-50%);
-          border-radius:50%; background:#0284c7; border:3px solid white; z-index:4; box-shadow:0 2px 5px rgba(0,0,0,.25); }
-        .compass-data { flex:1; min-width:220px; text-align:${isRtl ? "right" : "left"}; }
-        .compass-speed { font-size:25px; font-weight:950; color:#0369a1; margin-top:8px; }
+        .compass-center { position:absolute; width:12px; height:12px; left:50%; top:50%; transform:translate(-50%,-50%);
+          border-radius:50%; background:#0284c7; border:2px solid white; z-index:4; box-shadow:0 2px 5px rgba(0,0,0,.25); }
+        .compass-data { flex:1; min-width:160px; text-align:${isRtl ? "right" : "left"}; }
+        .compass-speed { font-size:20px; font-weight:950; color:#0369a1; margin-top:8px; }
         .compass-speed span { font-size:11px; }
-        .smart-alerts-panel { min-height:150px; padding:10px; border:1px solid #fed7aa; border-radius:10px; background:linear-gradient(145deg,#fff,#fff7ed); box-shadow:0 3px 10px rgba(15,23,42,.07); }
-        .smart-alerts-head { display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:950; color:#0f172a; }
-        .smart-alerts-head span { min-width:22px; height:22px; border-radius:50%; display:grid; place-items:center; background:#f97316; color:white; font-size:10px; }
-        .smart-alerts-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin-top:8px; }
-        .smart-alert { display:flex; align-items:center; gap:7px; padding:7px; border-radius:8px; border:1px solid #e2e8f0; background:white; min-width:0; }
+        .smart-alerts-panel { min-height:118px; padding:8px; border:1px solid #fed7aa; border-radius:10px; background:linear-gradient(145deg,#fff,#fff7ed); box-shadow:0 3px 10px rgba(15,23,42,.07); }
+        .smart-alerts-head { display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:950; color:#0f172a; }
+        .smart-alerts-head span { min-width:18px; height:18px; border-radius:50%; display:grid; place-items:center; background:#f97316; color:white; font-size:9px; }
+        .smart-alerts-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px; margin-top:6px; }
+        .smart-alert { display:flex; align-items:center; gap:5px; padding:5px; border-radius:8px; border:1px solid #e2e8f0; background:white; min-width:0; }
         .smart-alert.high { border-color:#fecaca; background:#fff1f2; }
         .smart-alert.medium { border-color:#fed7aa; background:#fff7ed; }
         .smart-alert-icon { font-size:18px; }
         .smart-alert-text { min-width:0; display:flex; flex-direction:column; }
-        .smart-alert-text strong { font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .smart-alert-text small { color:#64748b; font-size:9px; margin-top:2px; }
+        .smart-alert-text strong { font-size:9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .smart-alert-text small { color:#64748b; font-size:8px; margin-top:1px; }
         .no-alerts { margin-top:10px; padding:18px 8px; text-align:center; border-radius:8px; background:#ecfdf5; color:#047857; font-size:11px; font-weight:800; }
         .graph-hover-info { min-height:30px; margin-top:8px; padding:7px 10px; border-radius:7px; background:rgba(15,23,42,.55); color:#e0f2fe; font-size:12px; }
         .wind-graph-column { cursor: crosshair; transition: transform .15s ease; }
@@ -1352,6 +2122,7 @@ export default function App() {
           to { transform: scale(1.10) translate3d(1%, -1%, 0); }
         }
         @media (max-width: 800px) {
+          .wg-15day-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
           .spot-grid { grid-template-columns: 1fr; }
           .panel-intro { align-items: flex-start; flex-wrap: wrap; }
           .panel-intro span { width: 100%; margin-left: 0; }
@@ -1401,6 +2172,22 @@ export default function App() {
           background: white; width: 100%; max-width: 580px; border-radius: 10px;
           overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: fadeIn 0.2s ease-in-out;
         }
+        .morocco-weather-modal { max-width: 1100px; width: min(1100px, 96vw); }
+        .morocco-weather-modal .modal-body { padding: 12px; background: #f8fafc; max-height: 82vh; }
+        .morocco-weather-title { display:flex; align-items:center; gap:8px; min-width:0; }
+        .morocco-weather-title small { display:block; color:#bae6fd; font-size:10px; font-weight:700; margin-top:2px; }
+        .morocco-15day-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:9px; }
+        .morocco-15day-card { border:1px solid #dbeafe; background:white; color:#0f172a; border-radius:11px; padding:10px 8px; min-height:155px; text-align:center; box-shadow:0 2px 8px rgba(15,23,42,.06); }
+        .morocco-15day-card:hover { border-color:#38bdf8; transform:translateY(-1px); }
+        .morocco-15day-date { font-size:11px; font-weight:900; color:#334155; }
+        .morocco-15day-icon { font-size:29px; margin:7px 0 4px; line-height:1; }
+        .morocco-15day-condition { min-height:24px; font-size:10px; font-weight:800; color:#0369a1; }
+        .morocco-15day-temp { margin-top:5px; font-size:12px; color:#475569; }
+        .morocco-15day-temp strong { color:#0284c7; font-size:19px; }
+        .morocco-15day-meta { margin-top:6px; font-size:9px; font-weight:800; color:#64748b; line-height:1.5; }
+        .morocco-15day-loading { text-align:center; padding:45px 15px; color:#64748b; font-weight:800; }
+        @media (max-width: 800px) { .morocco-15day-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+        @media (max-width: 520px) { .morocco-15day-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .morocco-weather-modal .modal-header { padding:11px 12px; } }
         .modal-header {
           background: #0f172a; color: white; padding: 14px 18px;
           display: flex; justify-content: space-between; align-items: center; font-weight: 900; font-size: 16px;
@@ -1421,25 +2208,60 @@ export default function App() {
         .settings-saved { text-align: center; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 8px; font-size: 11px; font-weight: 800; }
         @media (max-width: 600px) { .settings-options-grid, .settings-speed-grid { grid-template-columns: 1fr; } }
         
-        @keyframes fadeIn {
+        /* Compact desktop layout: cards stay informative without taking too much vertical space. */
+        .live-card-icon { width:18px !important; height:18px !important; }
+        .weather-tools-grid { gap:6px; padding:6px; }
+        .wind-compass-panel, .smart-alerts-panel { min-height:104px; }
+        .smart-alerts-list { gap:4px; margin-top:5px; }
+        .smart-alert { padding:4px; gap:4px; }
+        .smart-alert-icon { font-size:15px; }
+        @media (max-width: 1050px) {
+          .live-weather-cards { grid-template-columns: repeat(3, minmax(120px, 1fr)); }
+        }
+        @media (max-width: 700px) {
+          .live-weather-cards { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+          .live-card { min-height:96px; padding:8px; }
+        }
+
+        /* Compact live weather cards */
+        .live-weather-cards { grid-template-columns: repeat(6, minmax(105px, 1fr)); gap: 5px; padding: 5px; }
+        .live-card { min-height: 88px; padding: 7px; border-radius: 7px; }
+        .live-card-photo img { inset: -7px; width: calc(100% + 14px); height: calc(100% + 14px); opacity: .65; }
+        .live-card-head { gap: 4px; font-size: 9px; }
+        .live-card-value { margin-top: 2px; font-size: 18px; letter-spacing: -.4px; }
+        .live-card-value span { font-size: 9px !important; }
+        .live-card-sub { margin-top: 1px; font-size: 8px; }
+        .live-meter { left: 7px; right: 7px; bottom: 6px; height: 4px; }
+        .live-orbit { width: 34px; height: 34px; margin-top: 3px; border-width: 2px; }
+        @media (max-width: 1050px) {
+          .live-weather-cards { grid-template-columns: repeat(3, minmax(105px, 1fr)); }
+        }
+        @media (max-width: 700px) {
+          .live-weather-cards { grid-template-columns: repeat(2, minmax(110px, 1fr)); gap: 4px; padding: 4px; }
+          .live-card { min-height: 82px; padding: 6px; }
+          .live-card-value { font-size: 17px; }
+          .live-card-sub { font-size: 7.5px; }
+        }
+
+@keyframes fadeIn {
           from { opacity: 0; transform: translateY(-10px); }
           to { opacity: 1; transform: translateY(0); }
         }
 
         .live-weather-cards {
           display: grid;
-          grid-template-columns: repeat(6, minmax(150px, 1fr));
-          gap: 8px;
-          padding: 8px;
+          grid-template-columns: repeat(6, minmax(125px, 1fr));
+          gap: 6px;
+          padding: 6px;
           background: #f1f5f9;
         }
         .live-card {
           position: relative;
-          min-height: 128px;
+          min-height: 104px;
           overflow: hidden;
           border: 1px solid #cbd5e1;
-          border-radius: 10px;
-          padding: 12px;
+          border-radius: 8px;
+          padding: 9px;
           background: #0f172a;
           box-shadow: 0 3px 10px rgba(15,23,42,.08);
           isolation: isolate;
@@ -1483,26 +2305,26 @@ export default function App() {
           z-index: -1;
         }
         .live-card-head {
-          display: flex; align-items: center; gap: 7px;
-          color: #ffffff; font-weight: 800; font-size: 11px;
+          display: flex; align-items: center; gap: 5px;
+          color: #ffffff; font-weight: 800; font-size: 10px;
           position: relative; z-index: 2;
           text-shadow: 0 1px 3px rgba(0,0,0,.55);
         }
         .live-card-value {
           display: flex; align-items: baseline; gap: 3px;
-          margin-top: 6px; color: #ffffff;
-          font-size: 25px; font-weight: 900;
+          margin-top: 4px; color: #ffffff;
+          font-size: 21px; font-weight: 900;
           letter-spacing: -.5px;
           position: relative; z-index: 2;
           text-shadow: 0 2px 5px rgba(0,0,0,.7);
         }
         .live-card-sub {
-          margin-top: 3px; color: #e0f2fe; font-size: 10px; font-weight: 700;
+          margin-top: 2px; color: #e0f2fe; font-size: 9px; font-weight: 700;
           position: relative; z-index: 2;
           text-shadow: 0 1px 3px rgba(0,0,0,.65);
         }
         .live-meter {
-          position: absolute; left: 12px; right: 12px; bottom: 11px;
+          position: absolute; left: 9px; right: 9px; bottom: 8px;
           height: 5px; border-radius: 99px; background: #dbeafe; overflow: hidden;
         }
         .live-meter span {
@@ -1546,6 +2368,123 @@ export default function App() {
           from { transform: translateX(-35px); }
           to { transform: translateX(35px); }
         }
+        .wg-morocco-cities {
+          margin: 16px auto 22px;
+          max-width: 1600px;
+          padding: 0 12px;
+        }
+        .wg-morocco-cities-panel {
+          background: linear-gradient(135deg, #07111f, #102a43 55%, #063b4c);
+          border: 1px solid rgba(34,211,238,.32);
+          border-radius: 14px;
+          padding: 13px;
+          box-shadow: 0 12px 35px rgba(15,23,42,.18);
+          overflow: hidden;
+        }
+        .wg-morocco-cities-head {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 10px;
+          color: white;
+        }
+        .wg-morocco-cities-title { font-size: 17px; font-weight: 900; }
+        .wg-morocco-cities-subtitle { color: #bae6fd; font-size: 10px; margin-top: 3px; }
+        .wg-morocco-cities-search {
+          width: min(290px, 100%);
+          height: 34px;
+          border-radius: 9px;
+          border: 1px solid #31556d;
+          background: #102a43;
+          color: white;
+          padding: 0 12px;
+          outline: none;
+        }
+        .wg-morocco-cities-search:focus { border-color: #22d3ee; box-shadow: 0 0 0 2px rgba(34,211,238,.14); }
+        .wg-morocco-cities-grid {
+          display: grid;
+          grid-template-columns: repeat(8, minmax(0, 1fr));
+          gap: 6px;
+          max-height: 285px;
+          overflow-y: auto;
+          padding-right: 2px;
+        }
+        .wg-morocco-city-btn {
+          border: 1px solid rgba(125,211,252,.18);
+          background: rgba(15,23,42,.46);
+          color: #f8fafc;
+          border-radius: 8px;
+          min-height: 58px;
+          padding: 5px 6px;
+          cursor: pointer;
+          text-align: center;
+          font-weight: 800;
+          transition: transform .15s ease, background .15s ease, border-color .15s ease;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 3px;
+        }
+        .wg-city-name {
+          font-size: 11px;
+          font-weight: 900;
+          line-height: 1.2;
+        }
+        .wg-city-weather {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+          min-height: 24px;
+          flex-wrap: wrap;
+        }
+        .wg-city-weather-icon { font-size: 16px; line-height: 1; }
+        .wg-city-temp { color: #67e8f9; font-size: 12px; font-weight: 950; }
+        .wg-city-condition { width: 100%; color: #bae6fd; font-size: 8px; font-weight: 700; line-height: 1.1; }
+        .wg-city-weather-loading { color: #94a3b8; font-size: 10px; min-height: 18px; display: flex; align-items: center; }
+        .wg-morocco-city-btn:hover {
+          transform: translateY(-2px);
+          background: rgba(14,165,233,.22);
+          border-color: rgba(34,211,238,.65);
+        }
+        .wg-morocco-city-btn:active { transform: translateY(0); }
+        .wg-morocco-city-search-any {
+          grid-column: 1 / -1;
+          padding: 16px;
+          border: 1px dashed rgba(125,211,252,.42);
+          border-radius: 10px;
+          background: rgba(14,165,233,.08);
+          text-align: center;
+          color: #e0f2fe;
+        }
+        .wg-morocco-city-search-any-title { font-size: 14px; font-weight: 900; }
+        .wg-morocco-city-search-any-sub { margin-top: 5px; font-size: 11px; color: #bae6fd; }
+        .wg-morocco-city-search-any-btn {
+          margin-top: 10px;
+          border: 1px solid rgba(34,211,238,.65);
+          background: #0369a1;
+          color: white;
+          border-radius: 8px;
+          padding: 8px 13px;
+          cursor: pointer;
+          font-weight: 900;
+          font-size: 11px;
+        }
+        .wg-morocco-city-search-any-btn:hover { background: #0284c7; }
+        .wg-morocco-city-search-any-btn:disabled { opacity: .65; cursor: wait; }
+
+        .wg-morocco-city-empty {
+          color: #bae6fd;
+          text-align: center;
+          padding: 25px 10px;
+          grid-column: 1 / -1;
+        }
+        @media (max-width: 1200px) {
+          .wg-15day-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
+          .wg-morocco-cities-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); max-height: 250px; }
+        }
         @media (max-width: 1050px) {
           .live-weather-cards { grid-template-columns: repeat(3, minmax(150px, 1fr)); }
         }
@@ -1575,12 +2514,133 @@ export default function App() {
           .live-card { min-height: 118px; padding: 10px; }
           .live-card-value { font-size: 22px; }
           .weather-tools-grid { grid-template-columns: 1fr; }
-          .pro-summary { grid-template-columns: 1fr; }
-          .pro-dashboard { margin: 5px; }
-          .wind-compass { width:96px; height:96px; flex-basis:96px; }
-          .compass-needle { height:35px; margin-top:-35px; }
+          .wind-compass { width:105px; height:105px; flex-basis:105px; }
+          .compass-needle { height:39px; margin-top:-39px; }
           .smart-alerts-list { grid-template-columns:1fr 1fr; }
+          .wg-morocco-cities { padding: 0 7px; }
+          .wg-morocco-cities-panel { padding: 10px; }
+          .wg-morocco-cities-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); max-height: 220px; gap: 5px; }
+          .wg-morocco-city-btn { min-height: 54px; }
+          .wg-city-name { font-size: 10px; }
+          .wg-morocco-cities-head { flex-direction: column; align-items: stretch; }
+          .wg-morocco-cities-search { width: 100%; }
         }
+
+        /* ===== Windgure — unified sizing & spacing ===== */
+        .main { width:100%; max-width:1600px; margin:0 auto; padding:8px 10px 18px; box-sizing:border-box; }
+        .main > section,
+        .main > .wg-morocco-cities,
+        .main > .wg-atmosphere-map,
+        .main > .weather-tools-grid,
+        .main > .live-weather-cards,
+        .main > .weather-table-wrap,
+        .main > .graph-view,
+        .main > .tides-view { box-sizing:border-box; width:100%; }
+
+        /* Equal visual rhythm for all main panels */
+        .live-weather-cards,
+        .weather-tools-grid { align-items:stretch; }
+        .live-card,
+        .wind-compass-panel,
+        .smart-alerts-panel,
+        .graph-view,
+        .tides-view,
+        .map-panel,
+        .settings-panel,
+        .wg-morocco-cities-panel,
+        .wg-atmosphere-map { box-sizing:border-box; }
+
+        .live-card,
+        .wind-compass-panel,
+        .smart-alerts-panel { height:108px; min-height:108px; }
+        .weather-tools-grid { grid-auto-rows:1fr; }
+        .weather-tools-grid > * { min-width:0; height:100%; }
+
+        .spot-grid,
+        .tides-photo-grid,
+        .wg-morocco-cities-grid { align-items:stretch; }
+        .spot-card,
+        .tide-photo-card,
+        .wg-morocco-city-btn { height:100%; box-sizing:border-box; }
+        .tide-photo-card { min-height:180px; }
+
+        /* Same outer width and controlled heights for the large sections */
+        .graph-view,
+        .tides-view,
+        .map-panel,
+        .settings-panel { width:100%; box-sizing:border-box; }
+        .map-frame-wrap { width:100%; height:390px; }
+        .wg-atmosphere-frame { width:100%; height:430px; }
+
+        /* City cards: one consistent size, no oversized/undersized cards */
+        .wg-morocco-city-btn { min-height:62px; height:62px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
+        .wg-city-name { line-height:1.15; font-size:12px; font-weight:900; min-height:14px; }
+        .wg-city-weather { min-height:20px; display:flex; align-items:center; justify-content:center; gap:4px; width:100%; }
+        .wg-city-weather-icon { font-size:16px; line-height:1; }
+        .wg-city-temp { font-size:12px; font-weight:900; }
+        .wg-city-condition { max-width:72px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:8px; opacity:.82; }
+        .wg-city-weather-loading { height:20px; display:flex; align-items:center; justify-content:center; font-size:11px; }
+
+        /* 15-day modal cards are equal too */
+        .morocco-15day-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; align-items:stretch; }
+        .morocco-15day-card { min-height:150px; height:100%; box-sizing:border-box; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; }
+
+        /* Prevent long labels from changing the layout */
+        .tool-title,.tool-subtitle,.panel-intro,.wg-atmosphere-title,.wg-atmosphere-subtitle { overflow:hidden; text-overflow:ellipsis; }
+
+        @media (max-width:1200px) {
+          .main { max-width:1200px; }
+          .live-weather-cards { grid-template-columns:repeat(3,minmax(0,1fr)); }
+          .wg-morocco-cities-grid { grid-template-columns:repeat(6,minmax(0,1fr)); }
+        }
+        @media (max-width:800px) {
+          .main { padding:6px 7px 14px; }
+          .live-weather-cards { grid-template-columns:repeat(2,minmax(0,1fr)); }
+          .live-card,.wind-compass-panel,.smart-alerts-panel { height:100px; min-height:100px; }
+          .weather-tools-grid { grid-template-columns:1fr; }
+          .wg-morocco-cities-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+          .wg-morocco-city-btn { height:60px; min-height:60px; }
+          .morocco-15day-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+          .map-frame-wrap { height:320px; }
+          .wg-atmosphere-frame { height:330px; }
+        }
+        @media (max-width:480px) {
+          .live-weather-cards { grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px; padding:4px; }
+          .live-card { height:92px; min-height:92px; padding:6px; }
+          .wg-morocco-cities { padding:0 4px; }
+          .wg-morocco-cities-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px; }
+          .wg-morocco-city-btn { height:58px; min-height:58px; }
+          .spot-grid,.tides-photo-grid { grid-template-columns:1fr; }
+          .tide-photo-card { min-height:160px; }
+        }
+
+/* 📍 Windgure earthquake location modal */
+.wg-earthquake-location-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(2,6,23,.68);backdrop-filter:blur(7px)}
+.wg-earthquake-location-modal.show{display:flex}
+.wg-earthquake-location-panel{position:relative;width:min(900px,100%);overflow:hidden;border:1px solid rgba(255,255,255,.12);border-radius:20px;background:#07111f;box-shadow:0 30px 90px rgba(0,0,0,.42)}
+.wg-eq-detail-brand{display:flex;align-items:center;gap:7px;padding:9px 13px;background:#07111f;color:#e2e8f0;border-bottom:1px solid rgba(255,255,255,.08);font-size:10px}.wg-eq-detail-brand strong{font-size:13px;letter-spacing:.2px}.wg-eq-detail-brand strong span{color:#22d3ee}.wg-eq-detail-brand>span:last-child{margin-left:auto;color:#94a3b8;font-size:8px}.wg-eq-brand-mark{width:26px;height:26px;display:grid;place-items:center;border-radius:7px;background:linear-gradient(135deg,#00d9ff,#0284c7);color:#07111f}
+.wg-earthquake-location-close{position:absolute;top:12px;right:12px;z-index:5;width:38px;height:38px;border:1px solid rgba(255,255,255,.15);border-radius:50%;background:rgba(255,255,255,.10);color:#fff;font-size:25px;line-height:1;cursor:pointer}
+.wg-eq-detail-header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 56px 20px 20px;background:linear-gradient(135deg,#0f172a,#1e293b,#450a0a);color:#fff}
+.wg-eq-detail-heading{min-width:0}.wg-eq-detail-label{font-size:9px;color:#94a3b8;margin-bottom:5px}.wg-eq-detail-country{font-size:13px;font-weight:950;margin-bottom:4px}.wg-eq-detail-place{font-size:17px;font-weight:900;max-width:650px;word-break:break-word}
+.wg-eq-detail-mag{width:78px;height:78px;flex:0 0 78px;display:grid;place-items:center;border-radius:50%;background:#dc2626;color:#fff;font-size:21px;font-weight:950;box-shadow:0 0 0 8px rgba(220,38,38,.14)}
+.wg-eq-detail-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,.08)}.wg-eq-detail-stats>div{padding:12px 14px;background:#0b1727;min-width:0}.wg-eq-detail-stats small{display:block;color:#64748b;font-size:8px;margin-bottom:4px}.wg-eq-detail-stats strong{display:block;color:#e2e8f0;font-size:10px;word-break:break-word}
+.wg-earthquake-detail-map{width:100%;height:430px;background:#e8eef5;border-top:1px solid rgba(15,23,42,.08)}.wg-earthquake-detail-map .leaflet-container{background:#e8eef5}.wg-earthquake-detail-map .leaflet-popup-content-wrapper{border-radius:12px;box-shadow:0 10px 30px rgba(15,23,42,.18)}.wg-earthquake-detail-map .leaflet-popup-content{font-family:Arial,sans-serif;font-size:11px;line-height:1.55;margin:11px 13px}.wg-earthquake-detail-map .leaflet-control-zoom a{background:#fff;color:#334155;border-color:#cbd5e1}.wg-earthquake-detail-map .leaflet-control-attribution{background:rgba(255,255,255,.9);color:#64748b}.wg-earthquake-detail-map .leaflet-control-attribution a{color:#2563eb}.wg-eq-detail-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 13px;color:#64748b;background:#f8fafc;font-size:8px}.wg-eq-detail-footer a{color:#fca5a5;text-decoration:none;font-weight:900}.wg-earthquake-map-error{height:100%;display:grid;place-items:center;color:#94a3b8;font-size:10px}
+.wg-earthquake-card{cursor:pointer}.wg-earthquake-card:focus{outline:2px solid rgba(239,68,68,.35);outline-offset:-2px}.wg-earthquake-card:hover{background:rgba(239,68,68,.045)}
+@media(max-width:700px){.wg-earthquake-location-modal{padding:9px}.wg-earthquake-location-panel{border-radius:15px}.wg-eq-detail-header{padding:17px 48px 16px 14px}.wg-eq-detail-place{font-size:12px}.wg-eq-detail-country{font-size:11px}.wg-eq-detail-mag{width:62px;height:62px;flex-basis:62px;font-size:17px}.wg-eq-detail-stats{grid-template-columns:repeat(2,1fr)}.wg-earthquake-detail-map{height:350px}.wg-eq-detail-footer{font-size:7px}}
+
+/* 🌍 Windgure earthquake list — simple background, no outer frame */
+.wg-earthquake-section{margin:24px 0 28px;background:transparent;border:0;border-radius:0;box-shadow:none;overflow:visible}
+.wg-earthquake-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:4px 2px 13px;background:transparent;border:0;color:inherit}
+.wg-earthquake-title-row{display:flex;align-items:center;gap:11px;min-width:0}.wg-earthquake-logo{width:38px;height:38px;display:grid;place-items:center;flex:0 0 38px;border-radius:12px;background:rgba(239,68,68,.10);font-size:19px}.wg-earthquake-title{font-size:17px;font-weight:950;color:#0f172a}.wg-earthquake-subtitle{margin-top:3px;font-size:8.5px;color:#64748b}
+.wg-earthquake-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}.wg-earthquake-status{display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;background:rgba(15,23,42,.045);font-size:8px;font-weight:900;color:#475569}.wg-earthquake-notify-btn{border:1px solid rgba(239,68,68,.18);border-radius:999px;padding:7px 10px;background:rgba(239,68,68,.07);color:#b91c1c;font-size:8px;font-weight:950;cursor:pointer}.wg-earthquake-notify-btn:hover{background:rgba(239,68,68,.13)}.wg-earthquake-notify-btn:disabled{opacity:.55;cursor:not-allowed}.wg-earthquake-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;animation:wgEqLive 1.3s ease-in-out infinite}
+@keyframes wgEqLive{50%{transform:scale(1.5);opacity:.55}}
+.wg-earthquake-alert{display:none;align-items:center;gap:10px;margin:0 0 10px;padding:10px 12px;color:#7f1d1d;background:#fff7f7;border-left:3px solid #ef4444;border-radius:10px}.wg-earthquake-alert.show{display:flex}.wg-earthquake-alert strong,.wg-earthquake-alert span{display:block}.wg-earthquake-alert strong{font-size:11px}.wg-earthquake-alert span:not(.wg-eq-alert-icon){margin-top:2px;font-size:8px;color:#991b1b}.wg-eq-alert-icon{font-size:19px}.wg-eq-alert-close{margin-inline-start:auto;width:25px;height:25px;border:0;border-radius:50%;background:rgba(127,29,29,.07);color:#991b1b;font-size:16px;cursor:pointer}
+.wg-earthquake-list{display:flex;flex-direction:column;background:transparent;padding:0;gap:0}
+.wg-earthquake-card{display:grid;grid-template-columns:68px minmax(0,1fr) auto;align-items:center;gap:14px;min-width:0;padding:13px 4px;border-bottom:1px solid rgba(148,163,184,.16);background:transparent;transition:background .16s ease}.wg-earthquake-card:first-child{border-top:1px solid rgba(148,163,184,.16)}.wg-earthquake-card:hover{background:rgba(148,163,184,.035)}
+.wg-eq-left{display:flex;flex-direction:column;align-items:center;gap:5px}.wg-eq-magnitude{width:58px;height:38px;display:grid;place-items:center;border-radius:10px;color:#fff;font-size:14px;font-weight:950}.wg-eq-mag-small{background:#15803d}.wg-eq-mag-low{background:#a16207}.wg-eq-mag-medium{background:#c2410c}.wg-eq-mag-high{background:#dc2626}.wg-eq-mag-critical{background:#991b1b}.wg-eq-time{font-size:7px;color:#94a3b8;text-align:center;white-space:nowrap}
+.wg-eq-main{min-width:0}.wg-eq-country{display:flex;align-items:center;gap:8px;min-width:0}.wg-eq-flag{font-size:24px;line-height:1;flex:0 0 auto}.wg-eq-country strong{display:block;font-size:11px;color:#0f172a;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wg-eq-country span:not(.wg-eq-flag){display:block;margin-top:2px;font-size:8px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wg-eq-place{margin-top:4px;font-size:8px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wg-eq-meta{display:flex;flex-wrap:wrap;gap:11px;margin-top:6px;color:#94a3b8;font-size:7px}.wg-eq-meta b{color:#475569;font-weight:850}.wg-eq-usgs{font-size:7.5px;font-weight:950;color:#b91c1c;text-decoration:none;white-space:nowrap;padding:5px 7px;border-radius:7px;background:rgba(239,68,68,.06)}.wg-eq-usgs:hover{background:rgba(239,68,68,.12)}
+.wg-earthquake-empty{padding:28px 10px;text-align:center;color:#64748b;font-size:9px}.wg-earthquake-note{padding:9px 2px;color:#94a3b8;background:transparent;font-size:7px;line-height:1.5}
+@media(max-width:700px){.wg-earthquake-section{margin:14px 0 18px}.wg-earthquake-head{padding-bottom:10px;align-items:flex-start;flex-direction:column}.wg-earthquake-title-row{width:100%}.wg-earthquake-actions{width:100%;justify-content:flex-start}.wg-earthquake-title{font-size:13px}.wg-earthquake-subtitle{font-size:7px}.wg-earthquake-card{grid-template-columns:52px minmax(0,1fr) auto;gap:9px;padding:11px 2px}.wg-eq-magnitude{width:50px;height:34px;font-size:12px}.wg-eq-flag{font-size:20px}.wg-eq-country strong{font-size:9.5px}.wg-eq-country span:not(.wg-eq-flag),.wg-eq-place{font-size:7px}.wg-eq-meta{gap:7px;font-size:6.5px}.wg-eq-usgs{font-size:6.5px;padding:4px 5px}.wg-eq-time{font-size:6.5px}}
       `}</style>
 
       {/* HEADER */}
@@ -1633,7 +2693,7 @@ export default function App() {
                       <span className="search-suggestion-main">
                         <span className="search-suggestion-name">{spot.name}</span>
                         <span className="search-suggestion-meta">
-                          {[spot.admin1, spot.country].filter(Boolean).join(" • ")}
+                          {[spot.type === "village" || spot.type === "hamlet" ? "قرية/دوار" : spot.type, spot.admin1, spot.country].filter(Boolean).join(" • ")}
                         </span>
                       </span>
                     </button>
@@ -1788,42 +2848,6 @@ export default function App() {
         </div>
       </section>
 
-      <section className="pro-dashboard">
-        <div className="pro-dashboard-head">
-          <div className="pro-dashboard-title">⚡ {t.liveDashboard}</div>
-          <div className="pro-live-badge"><span className="pro-live-dot" /> LIVE · {locationName}</div>
-        </div>
-        <div className="pro-summary">
-          <div className="smart-summary">
-            <div className="smart-summary-label">🧠 {t.smartSummary}</div>
-            <div className="smart-summary-text">{summaryText}</div>
-            <div className="summary-stats">
-              <span className="summary-stat">🌬️ {liveWindSpeed != null ? Number(liveWindSpeed).toFixed(1) : "-"} {speedUnit}</span>
-              <span className="summary-stat">💨 {liveWindGust != null ? Number(liveWindGust).toFixed(1) : "-"} {speedUnit}</span>
-              <span className="summary-stat">🌡️ {liveTemperature != null ? Math.round(liveTemperature) : "-"}°C</span>
-              <span className="summary-stat">🌧️ {liveRainProbability != null ? Math.round(liveRainProbability) : 0}%</span>
-            </div>
-          </div>
-          <div className="hourly-timeline">
-            <div className="timeline-head"><span>🕒 {t.nextHours}</span><span>{t.windSpeed} · {speedUnit}</span></div>
-            <div className="timeline-scroll">
-              {timelineItems.map((item, offset) => (
-                <button type="button" key={`${item.index}-${offset}`} className={`timeline-item ${offset === 0 ? "now" : ""} ${selectedTimelineOffset === offset ? "selected" : ""}`} onClick={() => setSelectedTimelineOffset(offset)} aria-pressed={selectedTimelineOffset === offset}>
-                  <div className="timeline-time">{offset === 0 ? "NOW" : item.time}</div>
-                  <div className="timeline-wind">{typeof item.wind === "number" ? Math.round(item.wind) : "-"}</div>
-                  <div className="timeline-temp">{typeof item.temp === "number" ? `${Math.round(item.temp)}°C` : "-"}</div>
-                  <div className="timeline-meta">
-                    <span>💨 {typeof item.gust === "number" ? Math.round(item.gust) : "-"}</span>
-                    <span>{getDirectionLabel(item.dir)}</span>
-                    {typeof item.rain === "number" && item.rain > 0 && <span className="timeline-rain">🌧️ {Math.round(item.rain)}%</span>}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="weather-tools-grid">
         <div className="wind-compass-panel">
           <div className="compass-info">
@@ -1866,24 +2890,36 @@ export default function App() {
           className={`tab ${activeTab === "forecast" ? "tab-active" : ""}`}
           onClick={() => setActiveTab("forecast")}
         >
-          {t.forecast}
+          <CloudSun size={15} strokeWidth={2.3} />
+          <span>{t.forecast}</span>
         </button>
         <button
           className={`tab ${activeTab === "graph" ? "tab-active" : ""}`}
           onClick={() => setActiveTab("graph")}
         >
-          {t.graph}
+          <TrendingUp size={15} strokeWidth={2.3} />
+          <span>{t.graph}</span>
         </button>
         <button
           className={`tab ${activeTab === "tides" ? "tab-active" : ""}`}
           onClick={() => setActiveTab("tides")}
         >
-          {t.tides}
+          <Waves size={15} strokeWidth={2.3} />
+          <span>{t.tides}</span>
+        </button>
+        <button
+          className={`tab earthquake-tab ${activeTab === "earthquakes" ? "tab-active" : ""}`}
+          onClick={() => setActiveTab("earthquakes")}
+          aria-label={t.earthquakes}
+        >
+          <Activity size={15} strokeWidth={2.5} />
+          <span>{t.earthquakes}</span>
+          <span id="wg-earthquake-tab-count" className="earthquake-tab-count">—</span>
         </button>
       </div>
 
-      {/* DAYS SELECTOR BAR */}
-      <div className="days-bar">
+      {/* DAYS SELECTOR BAR — غير لصفحات الطقس */}
+      {activeTab !== "earthquakes" && <div className="days-bar">
         <span style={{ fontWeight: 800, fontSize: "11px", color: "#475569" }}>
           <Calendar size={13} style={{ display: "inline", verticalAlign: "middle" }} /> {t.selectDay}
         </span>
@@ -1896,7 +2932,8 @@ export default function App() {
             {d.label}
           </button>
         ))}
-      </div>
+      </div>}
+
 
       {/* MAIN CONTENT */}
       <main className="main">
@@ -2174,9 +3211,184 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {activeTab === "earthquakes" && (
+          <section className="wg-earthquake-section wg-earthquake-tab-view" aria-label="معلومات الزلازل المباشرة حول العالم">
+            <div className="wg-earthquake-head">
+              <div className="wg-earthquake-title-row">
+                <div className="wg-earthquake-logo">🌍</div>
+                <div>
+                  <div className="wg-earthquake-title">مركز الزلازل العالمي</div>
+                  <div className="wg-earthquake-subtitle">زلازل العالم مباشرة · الدولة · المكان · القوة · العمق · الوقت</div>
+                </div>
+              </div>
+              <div className="wg-earthquake-actions">
+                <button type="button" id="wg-earthquake-notify-btn" className="wg-earthquake-notify-btn">🔔 تفعيل التنبيهات</button>
+                <div className="wg-earthquake-status"><span className="wg-earthquake-dot"></span><span id="wg-earthquake-count">جاري التحديث...</span></div>
+              </div>
+            </div>
+            <div id="wg-earthquake-alert" className="wg-earthquake-alert" role="alert" aria-live="assertive"></div>
+            <div id="wg-earthquake-list" className="wg-earthquake-list" aria-live="polite"></div>
+            <div className="wg-earthquake-note">● بيانات مباشرة من USGS · التحديث كل دقيقة · اضغط على أي زلزال لرؤية موقعه على الخريطة</div>
+          </section>
+        )}
+      <section className="wg-morocco-cities" aria-label="مدن المغرب">
+        <div className="wg-morocco-cities-panel">
+          <div className="wg-morocco-cities-head">
+            <div>
+              <div className="wg-morocco-cities-title">🇲🇦 مدن المغرب</div>
+              <div className="wg-morocco-cities-subtitle">اختَر أي مدينة لعرض الطقس ديالها مباشرة في Windgure</div>
+            </div>
+            <input
+              className="wg-morocco-cities-search"
+              value={moroccoCityQuery}
+              onChange={(e) => setMoroccoCityQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  searchAnyMoroccoPlace(moroccoCityQuery);
+                }
+              }}
+              placeholder="🔎 مدينة، قرية، دوار أو منطقة..."
+              aria-label="البحث في مدن وقرى ومناطق المغرب"
+            />
+          </div>
+
+          <div className="wg-morocco-cities-grid">
+            {MOROCCO_CITIES
+              .filter((city) => {
+                const q = normalizeCitySearch(moroccoCityQuery);
+                if (!q) return true;
+                const arName = normalizeCitySearch(city);
+                const frName = normalizeCitySearch(MOROCCO_CITY_FRENCH[city]);
+                return arName.includes(q) || frName.includes(q);
+              })
+              .map((city) => (
+                <button
+                  key={city}
+                  type="button"
+                  className="wg-morocco-city-btn"
+                  onClick={() => selectMoroccoCity(city)}
+                  title={`عرض توقعات 15 يوم لـ ${city}`}
+                >
+                  <div className="wg-city-name">{city}</div>
+                  {moroccoWeather[city] ? (
+                    (() => {
+                      const cityWeather = moroccoWeather[city];
+                      const weatherInfo = getMoroccoWeatherInfo(cityWeather.weatherCode);
+                      return (
+                        <div className="wg-city-weather">
+                          <span className="wg-city-weather-icon">{weatherInfo.icon}</span>
+                          <span className="wg-city-temp">{Math.round(cityWeather.temperature)}°C</span>
+                          <span className="wg-city-condition">{weatherInfo.label}</span>
+                        </div>
+                      );
+                    })()
+                  ) : (
+                    <div className="wg-city-weather-loading">{moroccoWeatherLoading ? "⏳" : "—"}</div>
+                  )}
+                </button>
+              ))}
+
+            {MOROCCO_CITIES.filter((city) => {
+              const q = normalizeCitySearch(moroccoCityQuery);
+              const arName = normalizeCitySearch(city);
+              const frName = normalizeCitySearch(MOROCCO_CITY_FRENCH[city]);
+              return !q || arName.includes(q) || frName.includes(q);
+            }).length === 0 && normalizeCitySearch(moroccoCityQuery) && (
+              <div className="wg-morocco-city-search-any">
+                <div className="wg-morocco-city-search-any-title">🔎 ما لقيّناش «{moroccoCityQuery}» فاللائحة</div>
+                <div className="wg-morocco-city-search-any-sub">يمكن البحث حتى على قرية، دوار أو منطقة غير موجودة في جدول المدن.</div>
+                <button
+                  type="button"
+                  className="wg-morocco-city-search-any-btn"
+                  onClick={() => searchAnyMoroccoPlace(moroccoCityQuery)}
+                  disabled={loading}
+                >
+                  {loading ? "⏳ جاري البحث..." : `🌤️ بحث عن طقس «${moroccoCityQuery}»`}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* 📍 نافذة تحديد مكان الزلزال */}
+      <div id="wg-earthquake-location-modal" className="wg-earthquake-location-modal" aria-hidden="true">
+        <div className="wg-earthquake-location-panel" role="dialog" aria-modal="true" aria-label="موقع الزلزال">
+          <button type="button" id="wg-earthquake-location-close" className="wg-earthquake-location-close" aria-label="إغلاق">×</button>
+          <div className="wg-eq-detail-brand"><div className="wg-eq-brand-mark"><Compass size={16} /></div><strong>wind<span>gure</span></strong><span>Earthquake location</span></div>
+          <div className="wg-eq-detail-header">
+            <div className="wg-eq-detail-heading">
+              <div className="wg-eq-detail-label">📍 موقع الزلزال بالضبط</div>
+              <div id="wg-eq-detail-country" className="wg-eq-detail-country">🌍 —</div>
+              <div id="wg-eq-detail-place" className="wg-eq-detail-place">—</div>
+            </div>
+            <div id="wg-eq-detail-mag" className="wg-eq-detail-mag">M—</div>
+          </div>
+          <div className="wg-eq-detail-stats">
+            <div><small>العمق</small><strong id="wg-eq-detail-depth">—</strong></div>
+            <div><small>الإحداثيات</small><strong id="wg-eq-detail-coords">—</strong></div>
+            <div><small>الوقت</small><strong id="wg-eq-detail-time">—</strong></div>
+            <div><small>التسونامي</small><strong id="wg-eq-detail-tsunami">—</strong></div>
+          </div>
+          <div id="wg-earthquake-detail-map" className="wg-earthquake-detail-map"></div>
+          <div className="wg-eq-detail-footer"><span>النقطة الحمراء = مركز الزلزال</span><a id="wg-eq-detail-usgs" href="https://earthquake.usgs.gov/earthquakes/map/" target="_blank" rel="noopener noreferrer">تفاصيل USGS ↗</a></div>
+        </div>
+      </div>
+
       </main>
 
       {/* AD BANNER BOTTOM */}
+
+      {/* نافذة توقعات 15 يوم لمدينة المغرب - لا تظهر داخل الصفحة الرئيسية */}
+      {selectedMoroccoCity && (
+        <div className="modal-overlay" onClick={() => setSelectedMoroccoCity(null)}>
+          <div className="modal-content morocco-weather-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="morocco-weather-title">
+                <span style={{fontSize:"22px"}}>🇲🇦</span>
+                <div>
+                  <div>{lang === "fr" ? (MOROCCO_CITY_FRENCH[selectedMoroccoCity] || selectedMoroccoCity) : selectedMoroccoCity}</div>
+                  <small>{lang === "fr" ? "Prévisions météo sur 15 jours" : "توقعات الطقس لمدة 15 يوم"}</small>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedMoroccoCity(null)}
+                style={{ background: "transparent", border: 0, color: "white", cursor: "pointer" }}
+                aria-label="إغلاق"
+              >
+                <X size={22} />
+              </button>
+            </div>
+            <div className="modal-body">
+              {loading && (!weatherData?.daily?.time || weatherData.daily.time.length === 0) ? (
+                <div className="morocco-15day-loading">⏳ جاري تحميل توقعات 15 يوم...</div>
+              ) : (
+                <div className="morocco-15day-grid">
+                  {(weatherData?.daily?.time || []).slice(0, 15).map((date, index) => {
+                    const info = getMoroccoWeatherInfo(weatherData.daily.weather_code?.[index]);
+                    const max = weatherData.daily.temperature_2m_max?.[index];
+                    const min = weatherData.daily.temperature_2m_min?.[index];
+                    const rain = weatherData.daily.precipitation_sum?.[index];
+                    const rainChance = weatherData.daily.precipitation_probability_max?.[index];
+                    const wind = weatherData.daily.wind_speed_10m_max?.[index];
+                    return (
+                      <div key={date} className="morocco-15day-card">
+                        <div className="morocco-15day-date">{index === 0 ? "اليوم" : index === 1 ? "غداً" : date}</div>
+                        <div className="morocco-15day-icon">{info.icon}</div>
+                        <div className="morocco-15day-condition">{info.label}</div>
+                        <div className="morocco-15day-temp"><strong>{max != null ? Math.round(max) : "-"}°</strong> / {min != null ? Math.round(min) : "-"}°C</div>
+                        <div className="morocco-15day-meta">🌧️ {rainChance != null ? Math.round(rainChance) : 0}% · {rain != null ? Number(rain).toFixed(1) : "0.0"} mm<br/>💨 {wind != null ? Math.round(wind) : "-"} {speedUnit}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MODALS */}
       {activeModal && (
